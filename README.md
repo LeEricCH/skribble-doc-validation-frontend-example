@@ -2,6 +2,8 @@
 
 Paperflow is a Next.js application that provides document validation services using the Skribble Validator API. The application allows users to upload and validate digital signatures in PDF documents, verify their authenticity, and download validation certificates.
 
+![readme_image](https://github.com/user-attachments/assets/2836cef9-2649-4af8-b5f6-5d642515a26d)
+
 ## Features
 
 - Document validation for digital signatures
@@ -30,6 +32,9 @@ SKRIBBLE_API_KEY=your_skribble_api_key
 ```
 
 See here how to obtain these credentials: [Skribble Docs](https://docs.skribble.com/business-admin/api/apicreate.html).
+
+### Live Demo
+You can view a live demo of Paperflow at: [paperflow.ch](https://paperflow.ch).
 
 ### Installation
 
