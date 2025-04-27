@@ -11,6 +11,10 @@ const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 export const metadata: Metadata = {
   title: "Paperflow - Digital Signature Platform",
   description: "A secure digital signature platform",
+  openGraph: {
+    images: ['/images/og.png'],
+    type: 'website',
+  },
 };
 
 export const viewport: Viewport = {
