@@ -1,0 +1,125 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --primary-color: #1E2942;
+  --secondary-color: #2B3B59;
+  --accent-color: #FF5C35;
+  --accent-green: #00A880;
+  --button-blue: #0099FF;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border-color: #E5E7EB;
+  --bg-color: #F9FAFB;
+  --white: #FFFFFF;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  min-height: 100vh;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  line-height: 1.5;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* Remove default focus styles for mouse users ONLY if :focus-visible is supported */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Show focus styles on keyboard focus */
+:focus-visible {
+  outline: 2px solid #0099FF;
+  outline-offset: 2px;
+}
+
+/* Material design card styles */
+.material-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+/* Material design elevation */
+.elevation-1 {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.elevation-2 {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Custom styling for the themed components */
+.text-primary-color {
+  color: var(--primary-color);
+}
+
+.bg-primary-color {
+  background-color: var(--primary-color);
+}
+
+.text-green-accent {
+  color: var(--accent-green);
+}
+
+.progress-green {
+  background-color: var(--accent-green);
+}
+
+.main-content {
+  min-height: 100vh;
+  background-color: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Add styles for logo text container */
+.logo-text-container {
+  display: flex;
+  flex-direction: column;
+  margin-left: 0.75rem;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: white;
+}
+
+.logo-subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
+}
