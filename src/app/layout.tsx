@@ -8,11 +8,14 @@ import { getMessages, getLocale } from 'next-intl/server';
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 
+// Get the base URL from environment variable, default to empty string
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+
 export const metadata: Metadata = {
-  title: "Paperflow - Digital Signature Platform",
-  description: "A secure digital signature platform",
+  title: "Paperflow - Validate e-signed documents",
+  description: "Securely validate e-signed documents using the Skribble API",
   openGraph: {
-    images: ['/images/og.png'],
+    images: [`${baseUrl}/images/og.png`],
     type: 'website',
   },
 };

@@ -30,6 +30,9 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  env: {
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL || 'https://paperflow.ch',
+  },
 };
 
 module.exports = withNextIntl(nextConfig); 
