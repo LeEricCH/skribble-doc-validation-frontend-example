@@ -70,16 +70,29 @@ export default function ValidatePage() {
     }
   }, []);
 
-  // Fetch signer information when validation is complete and we have an ID (only for single file)
+  // Fetch signer information when validation is complete and we have an ID
   useEffect(() => {
     async function fetchSignerInfo() {
-      // Only fetch for single file validation
-      if (validationComplete && validationData?.id) {
-        console.log("Fetching signer info for single file validation:", validationData.id);
+      // Check if we have either a single file validation or a batch with one file
+      const shouldFetchSingle = validationComplete && validationData?.id;
+      const shouldFetchBatchSingle = validationComplete && batchValidationData && 
+                                 batchValidationData.results?.length === 1 && 
+                                 batchValidationData.results[0].id;
+      
+      let validationId: string | undefined;
+      
+      if (shouldFetchSingle && validationData) {
+        validationId = validationData.id;
+      } else if (shouldFetchBatchSingle && batchValidationData && batchValidationData.results[0]) {
+        validationId = batchValidationData.results[0].id;
+      }
+      
+      if (validationId) {
+        console.log("Fetching signer info for validation:", validationId);
         setIsLoadingSigners(true);
         
         try {
-          const response = await fetch(`/api/signers/${validationData.id}`);
+          const response = await fetch(`/api/signers/${validationId}`);
           
           if (!response.ok) {
             throw new Error(`Failed to fetch signer info: ${response.status}`);
@@ -97,7 +110,7 @@ export default function ValidatePage() {
     }
     
     fetchSignerInfo();
-  }, [validationComplete, validationData]);
+  }, [validationComplete, validationData, batchValidationData]);
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
