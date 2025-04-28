@@ -241,15 +241,78 @@ export default function ValidatePage() {
               overflow: 'hidden',
               mt: 4,
               mb: 4,
-              p: { xs: 1, md: 4 }
+              p: { xs: 1, md: 0 }
             }}
           >
             <div className="results-container">
-              <ValidationResults 
-                data={validationData ? mapToDisplayData(validationData) : null}
-                signerInfo={signerInfo}
-                isLoadingSigners={isLoadingSigners}
-              />
+              <div className="results-content">
+                <ValidationResults 
+                  data={validationData ? mapToDisplayData(validationData) : null}
+                  signerInfo={signerInfo}
+                  isLoadingSigners={isLoadingSigners}
+                />
+              </div>
+              
+              {/* Action buttons inside the card with no side padding */}
+              <div className="action-buttons-container">
+                <Button
+                  variant="contained"
+                  onClick={resetValidation}
+                  startIcon={<RefreshCw size={18} />}
+                  sx={{
+                    bgcolor: '#e74c3c',
+                    '&:hover': {
+                      bgcolor: '#c0392b',
+                    },
+                    py: 2,
+                    px: 4,
+                    borderRadius: 0,
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    boxShadow: 'none',
+                    textTransform: 'none',
+                    minHeight: '54px',
+                    width: '70%',
+                    whiteSpace: 'nowrap',
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+                      zIndex: 1
+                    }
+                  }}
+                >
+                  {t('validateAnother')}
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => router.push('/history')}
+                  startIcon={<History size={18} />}
+                  sx={{
+                    borderColor: '#e74c3c',
+                    color: '#e74c3c',
+                    '&:hover': { 
+                      borderColor: '#c0392b', 
+                      bgcolor: 'rgba(231, 76, 60, 0.04)' 
+                    },
+                    py: 2,
+                    borderRadius: 0,
+                    borderLeft: 'none',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    minHeight: '54px',
+                    width: '30%',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {t('viewHistory')}
+                </Button>
+              </div>
             </div>
           </Paper>
         
@@ -356,56 +419,6 @@ export default function ValidatePage() {
             </Button>
           </Paper>
         )}
-
-        {/* "Validate another document" button at the bottom when validation is complete */}
-        {validationComplete && (
-          <Box sx={{ 
-            width: '100%', 
-            maxWidth: '1400px', 
-            mt: 3,
-            mb: 3,
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 2
-          }}>
-            <Button
-              variant="outlined"
-              onClick={resetValidation}
-              startIcon={<RefreshCw size={16} />}
-              sx={{
-                borderColor: 'rgba(0, 0, 0, 0.23)',
-                color: 'rgba(0, 0, 0, 0.87)',
-                '&:hover': { borderColor: 'rgba(0, 0, 0, 0.42)', bgcolor: 'rgba(0, 0, 0, 0.04)' },
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 500,
-                py: 1.5,
-                px: 4,
-                fontSize: '1rem'
-              }}
-            >
-              {t('validateAnother')}
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => router.push('/history')}
-              startIcon={<History size={16} />}
-              sx={{
-                borderColor: 'rgba(0, 0, 0, 0.23)',
-                color: 'rgba(0, 0, 0, 0.87)',
-                '&:hover': { borderColor: 'rgba(0, 0, 0, 0.42)', bgcolor: 'rgba(0, 0, 0, 0.04)' },
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 500,
-                py: 1.5,
-                px: 4,
-                fontSize: '1rem'
-              }}
-            >
-              {t('viewHistory')}
-            </Button>
-          </Box>
-        )}
       </div>
 
       <style jsx>{`
@@ -429,7 +442,21 @@ export default function ValidatePage() {
         }
         
         .results-container {
+          width: 100%;
+          padding: 0;
+        }
+        
+        .results-content {
           padding: 1.5rem;
+        }
+        
+        .action-buttons-container {
+          margin-top: 1rem;
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          padding: 0;
+          border-top: 1px solid #eaeaea;
         }
       `}</style>
     </MainContent>

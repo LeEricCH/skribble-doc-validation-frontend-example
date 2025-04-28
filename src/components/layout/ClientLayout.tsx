@@ -29,6 +29,30 @@ export default function ClientLayout({ children, locale, messages }: ClientLayou
               {children}
             </div>
           </main>
+
+          <style jsx global>{`
+            body {
+              margin: 0;
+              padding: 0;
+              overflow-x: hidden;
+            }
+            
+            .main-content {
+              margin-left: 240px;
+              min-height: 100vh;
+              background-color: #ffffff;
+            }
+            
+            .content-container {
+              padding: 20px;
+            }
+            
+            @media (max-width: 767px) {
+              .main-content {
+                margin-left: 0;
+              }
+            }
+          `}</style>
         </NextIntlClientProvider>
       </ThemeProvider>
     </AppRouterCacheProvider>
