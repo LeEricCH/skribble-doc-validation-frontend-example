@@ -2,13 +2,13 @@
 
 import { useCallback, useState, useEffect } from 'react'
 import { useDropzone, type FileRejection } from 'react-dropzone'
-import { Upload, File, Loader2, FileText, Info, CheckCircle } from 'lucide-react'
+import { Upload, File, X, UploadIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import "@/styles/uploader.css";
 
 interface DocumentUploaderProps {
-  onFileSelect: (file: File | null) => void
-  selectedFile: File | null
+  onFilesSelect: (files: File[]) => void
+  selectedFiles: File[]
   isValidating: boolean
 }
 
@@ -30,7 +30,7 @@ function LoadingSkeleton() {
   )
 }
 
-export default function DocumentUploader({ onFileSelect, selectedFile, isValidating }: DocumentUploaderProps) {
+export default function DocumentUploader({ onFilesSelect, selectedFiles, isValidating }: DocumentUploaderProps) {
   const t = useTranslations('DocumentUploader')
   const [fileError, setFileError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -48,7 +48,7 @@ export default function DocumentUploader({ onFileSelect, selectedFile, isValidat
   // Simulate loading state
   useEffect(() => {
     // Only show skeleton on initial mount, not after file selection
-    if (!selectedFile) {
+    if (selectedFiles.length === 0) {
       setIsLoading(true);
       const timer = setTimeout(() => {
         setIsLoading(false);
@@ -56,32 +56,42 @@ export default function DocumentUploader({ onFileSelect, selectedFile, isValidat
       return () => clearTimeout(timer);
     }
     setIsLoading(false);
-  }, [selectedFile]);
+  }, [selectedFiles]);
   
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
     setFileError(null);
     if (acceptedFiles?.length > 0) {
-      onFileSelect(acceptedFiles[0]);
+      // Merge with existing files
+      onFilesSelect([...selectedFiles, ...acceptedFiles]);
     } else if (fileRejections.length > 0) {
       // Show error message for rejected files
       const rejection = fileRejections[0];
       const errorMessage = rejection.errors[0]?.message || t('invalidFileType');
       setFileError(errorMessage);
     }
-  }, [onFileSelect, t]);
+  }, [onFilesSelect, selectedFiles, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       'application/pdf': ['.pdf'],
     },
-    maxFiles: 1,
+    maxFiles: 10, // Allow up to 10 files at once
     disabled: isValidating
   })
 
-  const handleChangeFile = () => {
+  const handleRemoveFile = (index: number) => {
+    const updatedFiles = [...selectedFiles];
+    updatedFiles.splice(index, 1);
+    onFilesSelect(updatedFiles);
+    if (updatedFiles.length === 0) {
+      setFileError(null);
+    }
+  }
+
+  const handleClearAllFiles = () => {
     setFileError(null);
-    onFileSelect(null);
+    onFilesSelect([]);
   }
 
   // Conditionally render loading skeleton or the actual uploader
@@ -91,57 +101,62 @@ export default function DocumentUploader({ onFileSelect, selectedFile, isValidat
 
   return (
     <div className="validator-container">
-      <div className="validator-info">
+      {/* <div className="validator-info">
         <div className="info-icon">
           <Info size={20} />
         </div>
         <p className="info-text">
-          {t('info')}
+          {t('info')} {selectedFiles.length > 0 ? t('batchValidationInfo') : ''}
         </p>
-      </div>
+      </div> */}
     
       <div className="card-container">
-        {isValidating ? (
-          <div className="validating-state">
-            <div className="validating-animation">
-              <div className="spinner-container">
-                <Loader2 size={72} className="spinner" />
-              </div>
-              <div className="document-animation">
-                <FileText size={40} className="document-icon" />
-              </div>
-            </div>
-            <div className="validating-content">
-              <h3 className="validating-title">{t('validating')}</h3>
-              <div className="progress-bar">
-                <div className="progress-bar-inner" />
-              </div>
-              <p className="validating-description">
-                {t('validatingDescription')}
-              </p>
-            </div>
-          </div>
-        ) : selectedFile ? (
-          <div className="file-selected-state">
-            <div className="file-selected-content">
-              <div className="file-icon-container">
-                <File size={40} className="file-icon" />
-                <div className="file-type-badge">{selectedFile.name.split('.').pop()?.toUpperCase()}</div>
-              </div>
-              <div className="file-info-container">
-                <h3 className="file-name" title={selectedFile.name}>{getDisplayName(selectedFile.name)}</h3>
-                <p className="file-size">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                <div className="file-ready-status">
-                  <CheckCircle size={16} />
-                  <span>{t('readyForValidation')}</span>
-                </div>
-              </div>
+        {selectedFiles.length > 0 ? (
+          <div className="files-selected-state">
+            <div className="files-header">
+              <h3 className="batch-title">
+                {selectedFiles.length > 1 
+                  ? t('selectedFilesBatch', { count: selectedFiles.length }) 
+                  : t('selectedFile')}
+              </h3>
               <button 
                 type="button" 
-                className="change-file-button"
-                onClick={handleChangeFile}
+                className="clear-all-button"
+                onClick={handleClearAllFiles}
               >
-                {t('changeFile')}
+                {t('clearAll')}
+              </button>
+            </div>
+            
+            <div className="files-list">
+              {selectedFiles.map((file, index) => (
+                <div key={`${file.name}-${index}`} className="file-item">
+                  <div className="file-icon-container">
+                    <File size={24} className="file-icon" />
+                    <div className="file-type-badge">{file.name.split('.').pop()?.toUpperCase()}</div>
+                  </div>
+                  <div className="file-info-container">
+                    <h4 className="file-name" title={file.name}>{getDisplayName(file.name)}</h4>
+                    <p className="file-size">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="remove-file-button"
+                    onClick={() => handleRemoveFile(index)}
+                    disabled={isValidating}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            
+            {/* Add more files button */}
+            <div className="add-more-container" {...getRootProps()}>
+              <input {...getInputProps()} />
+              <button type="button" className="add-more-button">
+                <UploadIcon size={16} />
+                {t('addMoreFiles')}
               </button>
             </div>
           </div>
@@ -155,9 +170,9 @@ export default function DocumentUploader({ onFileSelect, selectedFile, isValidat
               <div className="upload-icon-container">
                 <Upload size={48} className="upload-icon" />
               </div>
-              <h3 className="uploader-title">{t('dragDrop')}</h3>
+              <h3 className="uploader-title">{t('dragDropMultiple')}</h3>
               <p className="uploader-description">
-                {t('or')} <button type="button" className="browse-button">{t('browse')}</button> {t('toUpload')}
+                {t('or')} <button type="button" className="browse-button">{t('browse')}</button> {t('toUploadMultiple')}
               </p>
               {fileError && (
                 <div className="file-error">

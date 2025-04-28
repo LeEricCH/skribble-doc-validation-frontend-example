@@ -9,11 +9,12 @@
     }
   },
   "Validator": {
-    "title": "Validation de document",
+    "title": "Validation de Document",
+    "description": "Téléchargez des documents pour vérifier leurs signatures et leur authenticité",
     "subtitle": "Téléchargez un document pour vérifier ses signatures et son authenticité",
     "errorTitle": "Erreur de validation",
     "errorHelp": "- Veuillez réessayer ou vérifier le document.",
-    "contactSupport": "Besoin d'aide ?",
+    "contactSupport": "Besoin d'aide?",
     "contactSupportLink": "Contacter le support",
     "uploadTab": "Télécharger un document",
     "aboutTab": "À propos de la validation",
@@ -26,8 +27,8 @@
       "signatureAuthenticity": "Authenticité et intégrité de la signature",
       "certificateValidity": "Validité du certificat et chaînes de confiance",
       "timestampVerification": "Vérification de l'horodatage",
-      "longTermValidation": "Preuves de validation à long terme",
-      "compliance": "Conformité avec divers cadres législatifs"
+      "longTermValidation": "Preuve de validation à long terme",
+      "compliance": "Conformité avec différents cadres législatifs"
     },
     "supportedDocumentTypes": "Types de documents pris en charge",
     "documentTypes": {
@@ -42,7 +43,14 @@
     "validateAnother": "Valider un autre document",
     "viewHistory": "Voir l'historique",
     "validate": "Valider",
-    "validating": "Validation en cours..."
+    "validateBatch": "Valider tous les documents",
+    "validating": "Validation en cours...",
+    "validationFailed": "Échec de la validation",
+    "tryAgain": "Réessayer",
+    "validatingDocument": "Validation du document",
+    "validatingBatch": "Validation de {count} documents",
+    "validatingDescription": "Nous vérifions les signatures et l'authenticité. Cela peut prendre quelques instants.",
+    "processingFiles": "Traitement de vos fichiers..."
   },
   "ValidationSettings": {
     "title": "Paramètres de validation",
@@ -109,25 +117,33 @@
     "saveSettings": "Enregistrer les paramètres"
   },
   "DocumentUploader": {
-    "info": "Téléchargez un document signé pour vérifier ses signatures numériques et son authenticité.",
+    "info": "Téléchargez des documents signés pour vérifier leurs signatures numériques et leur authenticité.",
+    "batchValidationInfo": "Plusieurs documents seront validés par lot avec les mêmes paramètres.",
     "dragDrop": "Glissez et déposez votre document ici",
+    "dragDropMultiple": "Glissez et déposez vos documents ici",
     "or": "ou",
     "browse": "parcourir les fichiers",
     "toUpload": "pour télécharger",
+    "toUploadMultiple": "pour télécharger des documents",
     "supportedFormats": "PDF",
     "validating": "Validation du document",
+    "validatingBatch": "Validation de {count} documents",
     "validatingDescription": "Nous vérifions les signatures et l'authenticité du document. Cela peut prendre quelques instants.",
     "checkingSignatures": "Vérification des signatures",
     "checkingCertificates": "Vérification de la validité du certificat",
     "analyzingIntegrity": "Analyse de l'intégrité du document",
     "readyForValidation": "Prêt pour la validation",
-    "changeFile": "Changer de fichier"
+    "changeFile": "Changer de fichier",
+    "clearAll": "Tout effacer",
+    "selectedFile": "Fichier sélectionné",
+    "selectedFilesBatch": "{count} documents sélectionnés",
+    "addMoreFiles": "Ajouter d'autres fichiers"
   },
   "ValidationResults": {
     "validDocument": "Document valide",
     "invalidDocument": "Document invalide",
     "requirementsNotMet": "Exigences non satisfaites",
-    "certButtonTitle": "Télécharger le certificat",
+    "certButtonTitle": "Voir le certificat",
     "documentInfo": "Informations sur le document",
     "filename": "Nom du fichier",
     "fileSize": "Taille du fichier",
@@ -171,7 +187,21 @@
     "signatureInfoDescription": "Informations sur les signatures numériques trouvées dans ce document, y compris la qualité et le statut de validation.",
     "certificateTitle": "Certificat de validation Paperflow",
     "certificateDescription": "Ce document officiel confirme que la validation a été effectuée et enregistre les résultats. Le certificat est inviolable, horodaté et peut être utilisé à des fins de vérification.",
-    "validationID": "ID de validation :"
+    "validationID": "ID de validation :",
+    "batchSummaryTitle": "Résumé de la validation par lot",
+    "totalDocuments": "Total des documents",
+    "validDocuments": "Documents valides",
+    "invalidDocuments": "Documents non valides",
+    "errorDocuments": "Documents en échec",
+    "successRate": "Taux de réussite",
+    "batchSettings": "Paramètres de validation utilisés",
+    "documentResults": "Résultats des documents",
+    "processingError": "Erreur de traitement",
+    "validationError": "Erreur de validation",
+    "file": "Fichier",
+    "unknown": "Inconnu",
+    "noResults": "Aucun résultat disponible",
+    "noResultsDescription": "Aucun résultat n'a été retourné par le processus de validation."
   },
   "SignerInfo": {
     "title": "Informations sur la signature",
@@ -222,6 +252,7 @@
     "by": "par Paperflow Validator",
     "certificateID": "ID du certificat :",
     "download": "Télécharger",
+    "view": "Voir",
     "generating": "Génération en cours...",
     "failureReasons": "Exigences de validation non satisfaites",
     "qualityRequirement": "Qualité requise",

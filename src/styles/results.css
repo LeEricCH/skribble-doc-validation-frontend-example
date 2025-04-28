@@ -457,11 +457,13 @@
     line-height: 1.5;
   }
   
+  /* Simplified summary stats styling */
   .summary-stats {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     background-color: rgba(0, 0, 0, 0.03);
-    padding: 1rem;
+    padding: 1.2rem 0.5rem;
     border-radius: 10px;
   }
   
@@ -477,6 +479,7 @@
     font-weight: 600;
     color: rgba(0, 0, 0, 0.8);
     margin-bottom: 0.3rem;
+    text-align: center;
   }
   
   .stat-label {
@@ -484,6 +487,7 @@
     color: rgba(0, 0, 0, 0.5);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    text-align: center;
   }
   
   .stat-divider {
@@ -838,4 +842,13 @@
 
   .signer-card.invalid {
     border-left: 4px solid #e74c3c;
+  }
+
+  /* Special centered class for values */
+  .centered-value {
+    display: block !important;
+    text-align: center !important;
+    width: 100% !important;
+    align-self: center !important;
+    margin: 0 auto !important;
   }

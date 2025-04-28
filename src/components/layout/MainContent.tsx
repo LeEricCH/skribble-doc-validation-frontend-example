@@ -1,12 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Preloader from "@/components/common/Preloader";
 
 interface MainContentProps {
   children: ReactNode;
   rightSidebar?: ReactNode;
   title?: string;
   subtitle?: string;
+  description?: string;
+  icon?: ReactNode;
   fullWidth?: boolean;
 }
 
@@ -15,19 +18,29 @@ export default function MainContent({
   rightSidebar,
   title,
   subtitle,
+  description,
+  icon,
   fullWidth = false
 }: MainContentProps) {
   return (
     <div className={`main-content-wrapper${fullWidth ? ' full-width' : ''}`}>
-      {(title || subtitle) && (
+      {(title || subtitle || description) && (
         <div className="content-header">
-          {title && <h1 className="content-title">{title}</h1>}
+          {title && (
+            <div className="title-container">
+              {icon && <div className="title-icon">{icon}</div>}
+              <h1 className="content-title">{title}</h1>
+            </div>
+          )}
           {subtitle && <p className="content-subtitle">{subtitle}</p>}
+          {description && <p className="content-description">{description}</p>}
         </div>
       )}
       <div className="content-body">
         <div className="content-main">
-          {children}
+          <Preloader>
+            {children}
+          </Preloader>
         </div>
         {rightSidebar && (
           <div className="content-sidebar">
@@ -53,6 +66,19 @@ export default function MainContent({
           text-align: center;
         }
         
+        .title-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+        }
+        
+        .title-icon {
+          display: flex;
+          align-items: center;
+          color: #3b82f6;
+        }
+        
         .content-title {
           font-size: 28px;
           font-weight: 500;
@@ -65,6 +91,16 @@ export default function MainContent({
           margin-bottom: 0;
           color: rgba(0, 0, 0, 0.6);
           font-size: 16px;
+        }
+        
+        .content-description {
+          margin-top: 12px;
+          margin-bottom: 0;
+          color: rgba(0, 0, 0, 0.6);
+          font-size: 16px;
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
         }
         
         .content-body {

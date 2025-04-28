@@ -1,0 +1,280 @@
+/* Batch Validation Results Styles */
+
+.batch-validation-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* Batch Summary Card */
+.batch-summary-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.batch-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.batch-summary-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.batch-summary-header svg {
+  color: #3b82f6;
+}
+
+.batch-summary-content {
+  padding: 24px;
+}
+
+.batch-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.batch-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.batch-stat-item.valid {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.batch-stat-item.invalid {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.batch-stat-item.error {
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.valid .stat-value svg {
+  color: #10b981;
+}
+
+.invalid .stat-value svg {
+  color: #ef4444;
+}
+
+.error .stat-value svg {
+  color: #f59e0b;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.batch-summary-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.batch-success-rate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.success-rate-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.success-rate-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.batch-settings-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.batch-settings-info svg {
+  color: #3b82f6;
+}
+
+/* Document Tabs */
+.document-tabs-container {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.document-tabs-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.document-tabs-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.document-tabs {
+  display: flex;
+  flex-direction: column;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.document-tab {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  background-color: white;
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.document-tab:last-child {
+  border-bottom: none;
+}
+
+.document-tab:hover {
+  background-color: #f9fafb;
+}
+
+.document-tab.active {
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.tab-icon {
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.valid-icon {
+  color: #10b981;
+}
+
+.invalid-icon {
+  color: #ef4444;
+}
+
+.error-icon {
+  color: #f59e0b;
+}
+
+.tab-content {
+  flex: 1;
+}
+
+.tab-filename {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.tab-status {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.tab-indicator {
+  color: #9ca3af;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.document-tab:hover .tab-indicator,
+.document-tab.active .tab-indicator {
+  opacity: 1;
+}
+
+/* Active Document Result */
+.active-document-result {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+}
+
+.document-error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px;
+}
+
+.document-error-message .error-icon {
+  color: #f59e0b;
+  margin-bottom: 16px;
+}
+
+.document-error-message h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.document-error-message p {
+  font-size: 14px;
+  color: #6b7280;
+  max-width: 500px;
+  margin-bottom: 16px;
+}
+
+.error-filename {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  padding: 8px 16px;
+  background-color: #f9fafb;
+  border-radius: 6px;
+} 

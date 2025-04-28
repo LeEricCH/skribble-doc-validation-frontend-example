@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { ValidationApiClient } from '../../../lib/ValidationApiClient';
 import type { ApiErrorResponse, ValidationOptions } from '../../../types/validation';
-import type { ValidationResponseWithSettings } from '@/types/certificate';
 
 // Retrieve credentials from environment variables
 const SKRIBBLE_USERNAME = process.env.SKRIBBLE_USERNAME;
@@ -19,8 +18,24 @@ export async function POST(request: Request) {
 
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as File | null;
     
+    // Check if this is a batch validation or single file
+    const files: File[] = [];
+    
+    // Get all files from formData
+    for (const entry of formData.entries()) {
+      if (entry[0].startsWith('file')) {
+        const file = entry[1];
+        if (file instanceof File) {
+          files.push(file);
+        }
+      }
+    }
+    
+    if (files.length === 0) {
+      return NextResponse.json({ message: 'No files uploaded.' }, { status: 400 });
+    }
+
     // Get validation settings from the request if provided
     let validationSettings: ValidationOptions | undefined;
     const settingsJson = formData.get('settings') as string | null;
@@ -34,42 +49,77 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!file) {
-      return NextResponse.json({ message: 'No file uploaded.' }, { status: 400 });
-    }
-
-    // Check file size (adjust limit if needed, API limit is 50MB)
+    // Check file sizes (adjust limit if needed, API limit is 50MB)
     const MAX_FILE_SIZE_MB = 50;
-    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-      return NextResponse.json(
-        { message: `File size exceeds the limit of ${MAX_FILE_SIZE_MB} MB.` }, 
-        { status: 413 } // Payload Too Large
-      );
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        return NextResponse.json(
+          { message: `File ${file.name} exceeds the limit of ${MAX_FILE_SIZE_MB} MB.` }, 
+          { status: 413 } // Payload Too Large
+        );
+      }
     }
 
     // Instantiate the API client
     const apiClient = new ValidationApiClient(SKRIBBLE_USERNAME, SKRIBBLE_API_KEY);
 
-    // Call the validation endpoint with settings if available
-    console.log(`API Route: Received file ${file.name} for validation.`);
-    const validationResult = await apiClient.validateDocument(file, validationSettings || {
-      // Default options if no settings provided
-      // These will only be used if no settings are passed from the client
-    });
-
-    console.log(`API Route: Validation successful for ${file.name}, ID: ${validationResult.id}`);
+    // Process each file and collect validation results
+    console.log(`API Route: Received ${files.length} files for batch validation.`);
     
-    // Include the validation settings in the response
-    const enhancedResponse: ValidationResponseWithSettings = {
-      ...validationResult,
-      // Include the settings that were used for validation
-      settings: validationSettings
+    const validationResults = await Promise.all(
+      files.map(async (file) => {
+        try {
+          console.log(`Validating file: ${file.name}`);
+          const result = await apiClient.validateDocument(file, validationSettings || {});
+          
+          // Add filename to result if not present
+          if (!result.filename) {
+            result.filename = file.name;
+          }
+          
+          return {
+            ...result,
+            originalFile: file.name,
+            error: null
+          };
+        } catch (error) {
+          console.error(`Error validating file ${file.name}:`, error);
+          // Return structured error for this specific file
+          return {
+            id: `error-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            valid: false,
+            originalFile: file.name,
+            signatures: 0,
+            validSignatures: 0,
+            error: error instanceof Error ? error.message : 'Unknown error during validation'
+          };
+        }
+      })
+    );
+
+    // Create summary of batch validation
+    const batchSummary = {
+      totalFiles: files.length,
+      validFiles: validationResults.filter(result => result.valid).length,
+      invalidFiles: validationResults.filter(result => !result.valid).length,
+      errorFiles: validationResults.filter(result => result.error).length
     };
 
-    return NextResponse.json(enhancedResponse, { status: 200 });
+    console.log('API Route: Batch validation completed. Summary:', batchSummary);
+    
+    // Enhanced response with batch information
+    const batchResponse = {
+      batch: {
+        summary: batchSummary,
+        settings: validationSettings
+      },
+      results: validationResults
+    };
+
+    return NextResponse.json(batchResponse, { status: 200 });
 
   } catch (error: unknown) {
-    console.error('API Route: Error during validation:', error);
+    console.error('API Route: Error during batch validation:', error);
 
     // Check if it's a structured API error from our client
     if (error && typeof error === 'object' && 'status' in error && 'message' in error) {

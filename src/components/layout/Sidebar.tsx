@@ -134,10 +134,10 @@ export default function Sidebar() {
     { 
       icon: Upload, 
       label: t('validate'), 
-      href: "/validate",
+      href: "/",
       onClick: () => {
-        if (pathname === '/validate') {
-          window.location.href = '/validate';
+        if (pathname === '/') {
+          window.location.href = '/';
         }
       }
     },

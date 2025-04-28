@@ -7,7 +7,7 @@ import {
   Select,
   MenuItem,
   Box,
-  Chip,
+//   Chip,
   Tooltip,
   Paper,
   useTheme,
@@ -16,12 +16,12 @@ import {
 } from '@mui/material';
 import {
   ShieldCheck,
-  FileCheck,
+//   FileCheck,
   AlertTriangle,
   HelpCircle
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import type { ValidationOptions, SignatureQuality, Legislation, AdditionalInfo } from '@/types/validation';
+import type { ValidationOptions, SignatureQuality, Legislation } from '@/types/validation';
 
 interface ValidationSettingsPanelProps {
   settings: ValidationOptions | null;
@@ -75,15 +75,15 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
     onSettingsChange(newSettings);
   };
 
-  const handleInfosChange = (event: SelectChangeEvent<AdditionalInfo[]>) => {
-    const value = event.target.value as AdditionalInfo[];
-    const newSettings = {
-      ...localSettings,
-      infos: value
-    };
-    setLocalSettings(newSettings);
-    onSettingsChange(newSettings);
-  };
+//   const handleInfosChange = (event: SelectChangeEvent<AdditionalInfo[]>) => {
+//     const value = event.target.value as AdditionalInfo[];
+//     const newSettings = {
+//       ...localSettings,
+//       infos: value
+//     };
+//     setLocalSettings(newSettings);
+//     onSettingsChange(newSettings);
+//   };
 
   const handleRejectVisualDifferencesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newSettings = {
@@ -235,7 +235,7 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
         </Paper>
       </Box>
       {/* Additional Information Section */}
-      <Box>
+      {/* <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <FileCheck size={20} style={{ marginRight: 8, color: theme.palette.primary.main }} />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -301,7 +301,7 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
             </Typography>
           </FormControl>
         </Paper>
-      </Box>
+      </Box> */}
       {/* Rejection Settings Section */}
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

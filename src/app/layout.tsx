@@ -3,6 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "@/styles/styles.css";
 import "@/styles/responsive.css";
+import "@/styles/uploader.css";
+import "@/styles/results.css";
+import "@/styles/batch-validation.css";
 import ClientLayout from "@/components/layout/ClientLayout";
 import { getMessages, getLocale } from 'next-intl/server';
 

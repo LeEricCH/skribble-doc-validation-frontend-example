@@ -75,12 +75,12 @@ export interface ValidationDisplayData {
 }
 
 interface ValidationResultsProps {
-  data: ValidationDisplayData | null;
+  validation: ValidationDisplayData | null;
   signerInfo?: SignerInfo[] | null;
   isLoadingSigners?: boolean;
 }
 
-export default function ValidationResults({ data, signerInfo, isLoadingSigners = false }: ValidationResultsProps) {
+export default function ValidationResults({ validation, signerInfo, isLoadingSigners = false }: ValidationResultsProps) {
   const t = useTranslations('ValidationResults')
   const ts = useTranslations('SignerInfo')
   const tt = useTranslations('Tooltips')
@@ -89,7 +89,10 @@ export default function ValidationResults({ data, signerInfo, isLoadingSigners =
   const [showCertificate, setShowCertificate] = useState<boolean>(false);
   const [certificateData, setCertificateData] = useState<CertificateData | null>(null);
   
-  if (!data) return null;
+  if (!validation) return null;
+  
+  // Use data as an alias for validation to minimize changes in the rest of the component
+  const data = validation;
 
   // Determine if validation failed due to specific settings
   const failedDueToQuality = !data.valid && data.quality && data.settingsQuality && 
@@ -325,18 +328,18 @@ export default function ValidationResults({ data, signerInfo, isLoadingSigners =
             
             <div className="summary-stats">
               <div className="stat-item">
-                <span className="stat-value">{formatDate(data.timestamp)}</span>
-                <span className="stat-label">{t('validationTime')}</span>
+                <div className="stat-value centered-value">{formatDate(data.timestamp)}</div>
+                <div className="stat-label">{t('validationTime')}</div>
               </div>
               <div className="stat-divider" />
               <div className="stat-item">
-                <span className="stat-value">{data.validSignatures}/{data.totalSignatures}</span>
-                <span className="stat-label">{t('validSignaturesCount')}</span>
+                <div className="stat-value centered-value">{data.validSignatures}/{data.totalSignatures}</div>
+                <div className="stat-label">{t('validSignaturesCount')}</div>
               </div>
               <div className="stat-divider" />
               <div className="stat-item">
-                <span className="stat-value">{data.quality || 'N/A'}</span>
-                <span className="stat-label">{t('signatureQualityShort')}</span>
+                <div className="stat-value centered-value">{data.quality || 'N/A'}</div>
+                <div className="stat-label">{t('signatureQualityShort')}</div>
               </div>
             </div>
           </div>
