@@ -1,10 +1,21 @@
 import { NextResponse } from 'next/server';
-import { ValidationApiClient } from '../../../lib/ValidationApiClient';
+import { ValidationApiClient, type FileWithMetadata } from '../../../lib/ValidationApiClient';
 import type { ApiErrorResponse, ValidationOptions } from '../../../types/validation';
 
 // Retrieve credentials from environment variables
 const SKRIBBLE_USERNAME = process.env.SKRIBBLE_USERNAME;
 const SKRIBBLE_API_KEY = process.env.SKRIBBLE_API_KEY;
+
+// Simple polyfill check for Node.js environment
+// This helps prevent "File is not defined" errors in production
+if (typeof File === 'undefined') {
+  // We'll use dynamic import for the node buffer module
+  // but avoid direct assignment that causes type errors
+  import('node:buffer').then(buffer => {
+    // @ts-expect-error - Ignoring type mismatch as this is just a basic polyfill
+    global.File = buffer.File;
+  });
+}
 
 export async function POST(request: Request) {
   // Basic check for credentials
@@ -20,14 +31,21 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     
     // Check if this is a batch validation or single file
-    const files: File[] = [];
+    const files: FileWithMetadata[] = [];
     
     // Get all files from formData
     for (const entry of formData.entries()) {
       if (entry[0].startsWith('file')) {
         const file = entry[1];
-        if (file instanceof File) {
-          files.push(file);
+        // Check for file-like properties that match our FileWithMetadata interface
+        if (file && 
+            typeof file === 'object' && 
+            'name' in file && 
+            'size' in file && 
+            'type' in file && 
+            'arrayBuffer' in file &&
+            typeof file.arrayBuffer === 'function') {
+          files.push(file as FileWithMetadata);
         }
       }
     }

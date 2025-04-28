@@ -1,5 +1,14 @@
 import type { ValidationOptions, ValidationResponse, LoginRequest, LoginResponse, ApiErrorResponse, SignerInfo } from '../types/validation';
 
+// Define a type that works across both Node.js and browser environments
+export interface FileWithMetadata {
+  name: string;
+  size: number;
+  type: string;
+  arrayBuffer(): Promise<ArrayBuffer>;
+  text?(): Promise<string>;
+}
+
 /**
  * API Client for interacting with the Skribble Document Validation API.
  */
@@ -221,11 +230,11 @@ export class ValidationApiClient {
   /**
    * Validates a document by uploading it to the API.
    */
-  public async validateDocument(file: File, options?: ValidationOptions): Promise<ValidationResponse> {
+  public async validateDocument(file: FileWithMetadata, options?: ValidationOptions): Promise<ValidationResponse> {
     const token = await this.login(); // Ensure we have a valid token
 
     const formData = new FormData();
-    formData.append('content', file, file.name);
+    formData.append('content', file as unknown as Blob, file.name);
 
     // Build query parameters
     const queryParams = new URLSearchParams();
