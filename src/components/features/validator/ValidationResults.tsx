@@ -281,35 +281,36 @@ export default function ValidationResults({ data, signerInfo, isLoadingSigners =
       )}
       
       <div className="results-header">
-        <div className={`status-badge ${data.valid ? 'valid' : (failedDueToSettingsOnly ? 'settings-mismatch' : 'invalid')}`}>
-          {data.valid ? (
-            <>
-              <CheckCircle size={20} />
-              <span>{t('validDocument')}</span>
-            </>
-          ) : failedDueToSettingsOnly ? (
-            <>
-              <AlertTriangle size={20} />
-              <span>{t('requirementsNotMet')}</span>
-            </>
-          ) : (
-            <>
-              <AlertTriangle size={20} />
-              <span>{t('invalidDocument')}</span>
-            </>
-          )}
-        </div>
-        
-        <div className="header-actions">
-          <button 
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginBottom: '1.5rem' }}>
+          <div className={`status-badge big-badge ${data.valid ? 'valid' : (failedDueToSettingsOnly ? 'settings-mismatch' : 'invalid')}`}
+            style={{ marginBottom: '1.5rem', justifyContent: 'center' }}>
+            {data.valid ? (
+              <>
+                <CheckCircle size={32} />
+                <span>{t('validDocument')}</span>
+              </>
+            ) : failedDueToSettingsOnly ? (
+              <>
+                <AlertTriangle size={32} />
+                <span>{t('requirementsNotMet')}</span>
+              </>
+            ) : (
+              <>
+                <AlertTriangle size={32} />
+                <span>{t('invalidDocument')}</span>
+              </>
+            )}
+          </div>
+          {/* <button 
             type="button"
             className="certificate-button" 
             onClick={() => handleDownloadCertificate(data.id)}
             disabled={isDownloading}
+            style={{ margin: '0 auto', minWidth: 220, fontSize: '1.1rem', padding: '0.85rem 2.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <Download size={16} />
-            <span>{isDownloading ? 'Loading...' : t('certButtonTitle')}</span>
-          </button>
+            <Download size={20} />
+            <span style={{ marginLeft: 10 }}>{isDownloading ? 'Loading...' : t('certButtonTitle')}</span>
+          </button> */}
         </div>
       </div>
       
@@ -1061,9 +1062,7 @@ export default function ValidationResults({ data, signerInfo, isLoadingSigners =
         }
         
         .header-actions {
-          display: flex;
-          gap: 10px;
-          align-items: center;
+          display: none;
         }
 
         .certificate-button {
@@ -1559,6 +1558,15 @@ export default function ValidationResults({ data, signerInfo, isLoadingSigners =
           background-color: rgba(231, 76, 60, 0.05);
           padding: 0.25rem 0.5rem;
           border-radius: 4px;
+        }
+
+        .status-badge.big-badge {
+          font-size: 1.45rem;
+          padding: 1.1rem 2.5rem;
+          border-radius: 60px;
+          font-weight: 700;
+          min-width: 320px;
+          justify-content: center;
         }
       `}</style>
     </div>

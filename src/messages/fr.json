@@ -40,7 +40,9 @@
     "skribbleLinkText": "API Skribble Validator",
     "skribbleLinkUrl": "https://document-validation.skribble.cloud/",
     "validateAnother": "Valider un autre document",
-    "viewHistory": "Voir l'historique"
+    "viewHistory": "Voir l'historique",
+    "validate": "Valider",
+    "validating": "Validation en cours..."
   },
   "ValidationSettings": {
     "title": "Paramètres de validation",
@@ -54,6 +56,11 @@
         "SES": "Signature électronique simple (SES)",
         "AES": "Signature électronique avancée (AES)",
         "QES": "Signature électronique qualifiée (QES)"
+      },
+      "tooltips": {
+        "SES": "Niveau de base de sécurité de signature, adapté aux transactions à faible risque",
+        "AES": "Sécurité élevée avec identification forte, adapté à la plupart des transactions commerciales",
+        "QES": "Valeur juridique la plus élevée, équivalent à une signature manuscrite, adapté aux transactions à haute valeur"
       }
     },
     "legislation": {
@@ -64,6 +71,12 @@
         "CH": "Suisse",
         "EU": "Union européenne",
         "CH_EU": "Suisse & UE"
+      },
+      "tooltips": {
+        "WORLD": "Normes mondiales pour les signatures électroniques",
+        "CH": "Cadre juridique suisse pour les signatures électroniques (LSCE)",
+        "EU": "Règlement eIDAS européen pour les signatures électroniques",
+        "CH_EU": "Conformité avec les réglementations suisses et européennes"
       }
     },
     "longTermValidation": {
@@ -77,6 +90,11 @@
         "validation": "Détails de validation",
         "format": "Détails de format",
         "signer": "Informations sur le signataire"
+      },
+      "tooltips": {
+        "validation": "Informations détaillées sur le processus de validation et les résultats",
+        "format": "Détails techniques sur le format et la structure du document",
+        "signer": "Informations sur les signataires du document et leurs certificats"
       }
     },
     "rejectVisualDifferences": {
@@ -86,7 +104,9 @@
     "rejectUndefinedChanges": {
       "label": "Rejeter les changements non définis",
       "description": "Échouer la validation si des changements non définis sont détectés"
-    }
+    },
+    "resetSettings": "Réinitialiser les paramètres",
+    "saveSettings": "Enregistrer les paramètres"
   },
   "DocumentUploader": {
     "info": "Téléchargez un document signé pour vérifier ses signatures numériques et son authenticité.",
@@ -287,5 +307,26 @@
     "signerLongTermValidation": "Indique si cette signature inclut des données pour une vérification à long terme au-delà de l'expiration du certificat.",
     "certificateInfo": "Détails techniques sur le certificat numérique utilisé pour créer cette signature.",
     "validationCertificate": "Un certificat téléchargeable qui prouve que ce document a été validé par Paperflow."
+  },
+  "ValidationHistory": {
+    "title": "Historique de validation",
+    "subtitle": "Consultez l'historique de validation de vos documents",
+    "noHistory": "Aucun historique de validation pour le moment",
+    "clearHistory": "Effacer l'historique",
+    "clearHistoryConfirm": "Êtes-vous sûr de vouloir effacer tout l'historique de validation ?",
+    "clearHistorySuccess": "Historique de validation effacé avec succès",
+    "clearHistoryError": "Échec de l'effacement de l'historique de validation",
+    "documentInfo": "Informations du document",
+    "validationDate": "Date de validation",
+    "validationStatus": "Statut",
+    "validationDetails": "Détails de la validation",
+    "totalSignatures": "Total des signatures",
+    "validSignatures": "Signatures valides",
+    "invalidSignatures": "Signatures invalides",
+    "viewDocument": "Voir le document",
+    "deleteEntry": "Supprimer l'entrée",
+    "deleteEntryConfirm": "Êtes-vous sûr de vouloir supprimer cette entrée ?",
+    "deleteEntrySuccess": "Entrée supprimée avec succès",
+    "deleteEntryError": "Échec de la suppression de l'entrée"
   }
 } 

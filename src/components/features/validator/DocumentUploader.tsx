@@ -35,14 +35,28 @@ export default function DocumentUploader({ onFileSelect, selectedFile, isValidat
   const [fileError, setFileError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   
+  // Helper to truncate long filenames
+  const getDisplayName = (name: string) => {
+    const maxLen = 30;
+    if (name.length > maxLen) {
+      const ext = name.includes('.') ? `.${name.split('.').pop()}` : '';
+      return `${name.slice(0, maxLen - ext.length - 3)}...${ext}`;
+    }
+    return name;
+  };
+  
   // Simulate loading state
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    // Only show skeleton on initial mount, not after file selection
+    if (!selectedFile) {
+      setIsLoading(true);
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+    setIsLoading(false);
+  }, [selectedFile]);
   
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
     setFileError(null);
@@ -115,7 +129,7 @@ export default function DocumentUploader({ onFileSelect, selectedFile, isValidat
                 <div className="file-type-badge">{selectedFile.name.split('.').pop()?.toUpperCase()}</div>
               </div>
               <div className="file-info-container">
-                <h3 className="file-name">{selectedFile.name}</h3>
+                <h3 className="file-name" title={selectedFile.name}>{getDisplayName(selectedFile.name)}</h3>
                 <p className="file-size">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                 <div className="file-ready-status">
                   <CheckCircle size={16} />

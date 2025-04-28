@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   // HelpCircle,
-  Settings,
+  // Settings,
   ChevronRight,
   History,
   Upload,
@@ -135,9 +135,9 @@ export default function Sidebar() {
     { icon: History, label: t('history'), href: "/history" },
   ];
   
-  const bottomNavItems = [
-    { icon: Settings, label: t('settings'), href: "/settings/validation" },
-  ];
+  // const bottomNavItems = [
+  //   { icon: Settings, label: t('settings'), href: "/settings/validation" },
+  // ];
 
   return (
     <>
@@ -222,7 +222,7 @@ export default function Sidebar() {
             </Link>
           </DropdownMenuItem>
            */}
-          {bottomNavItems.map((item) => (
+          {/* {bottomNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -231,7 +231,7 @@ export default function Sidebar() {
               <item.icon size={20} className="sidebar-nav-item-icon" />
               <span className="sidebar-nav-item-text">{item.label}</span>
             </Link>
-          ))}
+          ))} */}
         </div>
       </aside>
 

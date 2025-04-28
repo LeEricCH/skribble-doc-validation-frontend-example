@@ -40,7 +40,9 @@
     "skribbleLinkUrl": "https://document-validation.skribble.cloud/",
     "validateAnother": "Weiteres Dokument validieren",
     "viewHistory": "Verlauf anzeigen",
-    "validationSettings": "Einstellungen"
+    "validationSettings": "Einstellungen",
+    "validate": "Validieren",
+    "validating": "Wird validiert..."
   },
   "DocumentUploader": {
     "info": "Laden Sie ein signiertes Dokument hoch, um dessen digitale Signaturen und Authentizität zu überprüfen.",
@@ -49,7 +51,6 @@
     "browse": "durchsuchen Sie Dateien",
     "toUpload": "zum Hochladen",
     "supportedFormats": "PDF",
-    "validating": "Dokument wird validiert",
     "validatingDescription": "Wir prüfen die Signaturen und Authentizität des Dokuments. Dies kann einen Moment dauern.",
     "checkingSignatures": "Überprüfung der Signaturen",
     "checkingCertificates": "Prüfung der Zertifikatsgültigkeit",
@@ -228,6 +229,11 @@
         "SES": "Einfache elektronische Signatur (SES)",
         "AES": "Fortgeschrittene elektronische Signatur (AES)",
         "QES": "Qualifizierte elektronische Signatur (QES)"
+      },
+      "tooltips": {
+        "SES": "Grundlegende Stufe der Signatursicherheit, geeignet für Transaktionen mit niedrigem Risiko",
+        "AES": "Hohe Sicherheit mit starker Identifikation, geeignet für die meisten Geschäftstransaktionen",
+        "QES": "Höchster rechtlicher Wert, gleichwertig mit handschriftlicher Unterschrift, geeignet für Transaktionen mit hohem Wert"
       }
     },
     "legislation": {
@@ -238,6 +244,12 @@
         "CH": "Schweiz",
         "EU": "Europäische Union",
         "CH_EU": "Schweiz & EU"
+      },
+      "tooltips": {
+        "WORLD": "Globale Standards für elektronische Signaturen",
+        "CH": "Schweizerischer Rechtsrahmen für elektronische Signaturen (ZertES)",
+        "EU": "Europäische eIDAS-Verordnung für elektronische Signaturen",
+        "CH_EU": "Konformität mit sowohl schweizerischen als auch EU-Vorschriften"
       }
     },
     "longTermValidation": {
@@ -251,6 +263,11 @@
         "validation": "Validierungsdetails",
         "format": "Formatdetails",
         "signer": "Unterzeichnerinformationen"
+      },
+      "tooltips": {
+        "validation": "Detaillierte Informationen über den Validierungsprozess und die Ergebnisse",
+        "format": "Technische Details über das Dokumentformat und die Struktur",
+        "signer": "Informationen über die Dokumentunterzeichner und ihre Zertifikate"
       }
     },
     "rejectVisualDifferences": {
@@ -260,7 +277,9 @@
     "rejectUndefinedChanges": {
       "label": "Undefinierte Änderungen ablehnen",
       "description": "Validierung fehlschlagen, wenn undefinierte Änderungen erkannt werden"
-    }
+    },
+    "resetSettings": "Einstellungen zurücksetzen",
+    "saveSettings": "Einstellungen speichern"
   },
   "Tooltips": {
     "documentInfo": "Grundlegende Informationen über das validierte Dokument, einschliesslich Dateidetails und Validierungsstatus.",
@@ -287,5 +306,26 @@
     "signerLongTermValidation": "Zeigt an, ob diese Signatur Daten für die langfristige Überprüfung nach Ablauf des Zertifikats enthält.",
     "certificateInfo": "Technische Details zum digitalen Zertifikat, das zum Erstellen dieser Signatur verwendet wurde.",
     "validationCertificate": "Ein herunterladbares Zertifikat, das beweist, dass dieses Dokument von Paperflow validiert wurde."
+  },
+  "ValidationHistory": {
+    "title": "Validierungsverlauf",
+    "subtitle": "Sehen Sie Ihren Dokumentenvalidierungsverlauf",
+    "noHistory": "Noch kein Validierungsverlauf vorhanden",
+    "clearHistory": "Verlauf löschen",
+    "clearHistoryConfirm": "Sind Sie sicher, dass Sie den gesamten Validierungsverlauf löschen möchten?",
+    "clearHistorySuccess": "Validierungsverlauf erfolgreich gelöscht",
+    "clearHistoryError": "Fehler beim Löschen des Validierungsverlaufs",
+    "documentInfo": "Dokumentinformationen",
+    "validationDate": "Validierungsdatum",
+    "validationStatus": "Status",
+    "validationDetails": "Validierungsdetails",
+    "totalSignatures": "Gesamtzahl der Unterschriften",
+    "validSignatures": "Gültige Unterschriften",
+    "invalidSignatures": "Ungültige Unterschriften",
+    "viewDocument": "Dokument anzeigen",
+    "deleteEntry": "Eintrag löschen",
+    "deleteEntryConfirm": "Sind Sie sicher, dass Sie diesen Eintrag löschen möchten?",
+    "deleteEntrySuccess": "Eintrag erfolgreich gelöscht",
+    "deleteEntryError": "Fehler beim Löschen des Eintrags"
   }
 } 

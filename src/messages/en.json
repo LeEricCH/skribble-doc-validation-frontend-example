@@ -40,13 +40,17 @@
     "skribbleLinkText": "Skribble Validator API",
     "skribbleLinkUrl": "https://document-validation.skribble.cloud/",
     "validateAnother": "Validate Another Document",
-    "viewHistory": "View History"
+    "viewHistory": "View History",
+    "validate": "Validate",
+    "validating": "Validating..."
   },
   "ValidationSettings": {
     "title": "Validation Settings",
     "validationRequirements": "Validation Requirements",
     "validationSettings": "Additional Information",
     "rejectionSettings": "Rejection Settings",
+    "resetSettings": "Reset Settings",
+    "saveSettings": "Save Settings",
     "quality": {
       "label": "Signature Quality",
       "helper": "Set the minimum signature quality required for validation",
@@ -54,6 +58,11 @@
         "SES": "Simple Electronic Signature (SES)",
         "AES": "Advanced Electronic Signature (AES)",
         "QES": "Qualified Electronic Signature (QES)"
+      },
+      "tooltips": {
+        "SES": "Basic level of signature security, suitable for low-risk transactions",
+        "AES": "High security with strong identification, suitable for most business transactions",
+        "QES": "Highest legal value, equivalent to handwritten signature, suitable for high-value transactions"
       }
     },
     "legislation": {
@@ -64,6 +73,12 @@
         "CH": "Switzerland",
         "EU": "European Union",
         "CH_EU": "Switzerland & EU"
+      },
+      "tooltips": {
+        "WORLD": "Global standards for electronic signatures",
+        "CH": "Swiss legal framework for electronic signatures (ZertES)",
+        "EU": "European Union eIDAS regulation for electronic signatures",
+        "CH_EU": "Compliance with both Swiss and EU regulations"
       }
     },
     "longTermValidation": {
@@ -77,6 +92,11 @@
         "validation": "Validation Details",
         "format": "Format Details",
         "signer": "Signer Information"
+      },
+      "tooltips": {
+        "validation": "Detailed information about the validation process and results",
+        "format": "Technical details about the document format and structure",
+        "signer": "Information about the document signers and their certificates"
       }
     },
     "rejectVisualDifferences": {
@@ -287,5 +307,26 @@
     "signerLongTermValidation": "Indicates if this signature includes data for long-term verification beyond certificate expiration.",
     "certificateInfo": "Technical details about the digital certificate used to create this signature.",
     "validationCertificate": "A downloadable certificate that proves this document was validated by Paperflow."
+  },
+  "ValidationHistory": {
+    "title": "Validation History",
+    "subtitle": "View your document validation history",
+    "noHistory": "No validation history yet",
+    "clearHistory": "Clear History",
+    "clearHistoryConfirm": "Are you sure you want to clear all validation history?",
+    "clearHistorySuccess": "Validation history cleared successfully",
+    "clearHistoryError": "Failed to clear validation history",
+    "documentInfo": "Document Information",
+    "validationDate": "Validation Date",
+    "validationStatus": "Status",
+    "validationDetails": "Validation Details",
+    "totalSignatures": "Total Signatures",
+    "validSignatures": "Valid Signatures",
+    "invalidSignatures": "Invalid Signatures",
+    "viewDocument": "View Document",
+    "deleteEntry": "Delete Entry",
+    "deleteEntryConfirm": "Are you sure you want to delete this entry?",
+    "deleteEntrySuccess": "Entry deleted successfully",
+    "deleteEntryError": "Failed to delete entry"
   }
 } 

@@ -7,16 +7,18 @@ interface MainContentProps {
   rightSidebar?: ReactNode;
   title?: string;
   subtitle?: string;
+  fullWidth?: boolean;
 }
 
 export default function MainContent({ 
   children, 
   rightSidebar,
   title,
-  subtitle 
+  subtitle,
+  fullWidth = false
 }: MainContentProps) {
   return (
-    <div className="main-content-wrapper">
+    <div className={`main-content-wrapper${fullWidth ? ' full-width' : ''}`}>
       {(title || subtitle) && (
         <div className="content-header">
           {title && <h1 className="content-title">{title}</h1>}
@@ -40,6 +42,10 @@ export default function MainContent({
           max-width: 1200px;
           margin: 0 auto;
           padding: 0 24px;
+        }
+        
+        .main-content-wrapper.full-width {
+          max-width: none;
         }
         
         .content-header {
