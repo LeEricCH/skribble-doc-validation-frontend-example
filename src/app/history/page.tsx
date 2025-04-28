@@ -172,19 +172,6 @@ export default function HistoryPage() {
     };
   };
 
-  // Function to get status text for display
-  const getStatusText = (item: ValidationHistoryItem): string => {
-    if (item.valid) {
-      return t('statusValid');
-    }
-    
-    if (isRequirementsNotMet(item)) {
-      return t('statusRequirementsNotMet');
-    }
-    
-    return t('statusInvalid');
-  };
-
   return (
     <MainContent
       title={t('title')}
@@ -415,7 +402,55 @@ export default function HistoryPage() {
           gap: 8px;
           width: 100%;
         }
+           color: #e74c3c;
+        }
         
+        .status-badge.requirements {
+          background-color: rgba(245, 158, 11, 0.1);
+          color: #f59e0b;
+        }
+        
+        .item-actions {
+          display: flex;
+          gap: 0.75rem;
+          margin-left: auto;
+          flex-shrink: 0;
+        }
+        
+        .item-details {
+            .history-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+          }
+          
+          .item-actions {
+            width: 100%;
+            justify-content: flex-end;
+            margin-left: 0;
+           display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          white-space: nowrap;
+        }
+        
+        @media (max-width: 768px) {
+     }
+          
+          .item-details {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+        }     display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          font-size: 0.9rem;
+          color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .item-date {
+          
         .item-filename-text {
           white-space: nowrap;
           overflow: hidden;
@@ -440,55 +475,7 @@ export default function HistoryPage() {
         
         .status-badge.invalid {
           background-color: rgba(231, 76, 60, 0.1);
-          color: #e74c3c;
-        }
-        
-        .status-badge.requirements {
-          background-color: rgba(245, 158, 11, 0.1);
-          color: #f59e0b;
-        }
-        
-        .item-actions {
-          display: flex;
-          gap: 0.75rem;
-          margin-left: auto;
-          flex-shrink: 0;
-        }
-        
-        .item-details {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-          font-size: 0.9rem;
-          color: rgba(0, 0, 0, 0.6);
-        }
-        
-        .item-date {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          white-space: nowrap;
-        }
-        
-        @media (max-width: 768px) {
-          .history-item {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-          }
-          
-          .item-actions {
-            width: 100%;
-            justify-content: flex-end;
-            margin-left: 0;
-          }
-          
-          .item-details {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-          }
-        }
+    
       `}</style>
     </MainContent>
   )
