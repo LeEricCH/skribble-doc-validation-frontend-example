@@ -237,8 +237,8 @@
     "clearHistoryConfirm": "Êtes-vous sûr de vouloir effacer tout l'historique de validation ? Cette action ne peut pas être annulée."
   },
   "Sidebar": {
-    "validate": "VALIDER UN DOCUMENT",
-    "history": "HISTORIQUE",
+    "validate": "Valider un document",
+    "history": "Historique",
     "help": "Aide",
     "settings": "Paramètres",
     "logoTitle": "Logo Paperflow",

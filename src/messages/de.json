@@ -191,8 +191,8 @@
     "clearHistoryConfirm": "Sind Sie sicher, dass Sie den gesamten Validierungsverlauf löschen möchten? Dies kann nicht rückgängig gemacht werden."
   },
   "Sidebar": {
-    "validate": "DOKUMENT PRÜFEN",
-    "history": "VERLAUF",
+    "validate": "Dokument prüfen",
+    "history": "Verlauf",
     "help": "Hilfe",
     "settings": "Einstellungen",
     "logoTitle": "Paperflow Logo",

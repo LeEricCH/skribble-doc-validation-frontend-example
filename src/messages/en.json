@@ -237,8 +237,8 @@
     "clearHistoryConfirm": "Are you sure you want to clear all validation history? This cannot be undone."
   },
   "Sidebar": {
-    "validate": "VALIDATE DOCUMENT",
-    "history": "HISTORY",
+    "validate": "Validate Document",
+    "history": "History",
     "help": "Help",
     "settings": "Settings",
     "logoTitle": "Paperflow Logo",
