@@ -153,7 +153,7 @@
     "subject": "Subjekt:",
     "issuer": "Aussteller:",
     "serialNumber": "Seriennummer:",
-    "attestation": "Dieses Zertifikat bescheinigt den Validierungsstatus des Dokuments zum Zeitpunkt der Validierung.",
+    "attestation": "Dieses Zertifikat ist nur zu Demo-Zwecken erstellt und nicht für Produktionsumgebungen geeignet.",
     "generatedOn": "Generiert am",
     "by": "von Paperflow Validator",
     "certificateID": "Zertifikat-ID:",

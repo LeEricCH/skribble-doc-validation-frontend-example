@@ -80,23 +80,34 @@
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 100;
-    width: 120px;
+    width: 160px;
     margin-top: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.1);
   }
   
   .dropdown-item {
     display: block;
     width: 100%;
-    padding: 8px 12px;
+    padding: 10px 12px;
     text-align: left;
-    background: none;
+    background: white;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s;
+    color: rgba(0, 0, 0, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .dropdown-item:last-child {
+    border-bottom: none;
   }
   
   .dropdown-item:hover {
     background-color: #f5f5f5;
+    color: #e74c3c;
   }
   
   .download-button {

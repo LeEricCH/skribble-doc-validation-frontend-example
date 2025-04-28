@@ -156,11 +156,12 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
                 <span>{isGenerating ? t('generating') : t('download')}</span>
               </button>
               {dropdownOpen && (
-                <div className="dropdown-menu">
+                <div className="dropdown-menu" style={{ backgroundColor: 'white' }}>
                   <button 
                     type="button"
                     onClick={() => handleExport('pdf')}
                     className="dropdown-item"
+                    style={{ color: 'rgba(0, 0, 0, 0.8)', backgroundColor: 'white' }}
                   >
                     {t('downloadPDF')}
                   </button>
@@ -168,6 +169,7 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
                     type="button"
                     onClick={() => handleExport('png')}
                     className="dropdown-item"
+                    style={{ color: 'rgba(0, 0, 0, 0.8)', backgroundColor: 'white' }}
                   >
                     {t('downloadPNG')}
                   </button>

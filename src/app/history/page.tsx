@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button, Paper, Typography, Box, IconButton, Chip } from '@mui/material'
-import { History, Trash2, CheckCircle, AlertTriangle, Clock, FileText, Download, Search, RefreshCw } from 'lucide-react'
+import { History, Trash2, CheckCircle, AlertTriangle, Clock, FileText, Search, RefreshCw, Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import MainContent from '@/components/layout/MainContent'
 import validationHistory, { type ValidationHistoryItem } from '@/utils/validationHistory'
@@ -259,7 +259,7 @@ export default function HistoryPage() {
                     <Button
                       size="small"
                       variant="outlined"
-                      startIcon={<Download size={16} />}
+                      startIcon={<Eye size={16} />}
                       onClick={() => handleViewCertificate(item.id, item.filename)}
                       disabled={isLoading && selectedValidation === item.id}
                       sx={{

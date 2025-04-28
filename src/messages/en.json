@@ -217,7 +217,7 @@
     "subject": "Subject:",
     "issuer": "Issuer:",
     "serialNumber": "Serial Number:",
-    "attestation": "This certificate attests to the validation status of the document at the time of validation.",
+    "attestation": "This certificate is only for demonstration purposes and is not suitable for production environments.",
     "generatedOn": "Generated on",
     "by": "by Paperflow Validator",
     "certificateID": "Certificate ID:",
