@@ -56,7 +56,8 @@
     "checkingCertificates": "Prüfung der Zertifikatsgültigkeit",
     "analyzingIntegrity": "Analyse der Dokumentenintegrität",
     "readyForValidation": "Bereit für Validierung",
-    "changeFile": "Datei ändern"
+    "changeFile": "Datei ändern",
+    "validating": "Wird validiert..."
   },
   "ValidationResults": {
     "validDocument": "Gültiges Dokument",

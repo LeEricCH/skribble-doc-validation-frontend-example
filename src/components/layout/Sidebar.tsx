@@ -131,7 +131,16 @@ export default function Sidebar() {
   };
 
   const navItems = [
-    { icon: Upload, label: t('validate'), href: "/validate" },
+    { 
+      icon: Upload, 
+      label: t('validate'), 
+      href: "/validate",
+      onClick: () => {
+        if (pathname === '/validate') {
+          window.location.href = '/validate';
+        }
+      }
+    },
     { icon: History, label: t('history'), href: "/history" },
   ];
   
@@ -174,6 +183,7 @@ export default function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={`sidebar-nav-item ${isActive ? "active" : ""}`}
+                onClick={item.onClick}
               >
                 <item.icon size={20} className="sidebar-nav-item-icon" />
                 <span className="sidebar-nav-item-text">{item.label}</span>

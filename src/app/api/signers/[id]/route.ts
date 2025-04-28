@@ -19,8 +19,8 @@ export async function GET(
     );
   }
 
-  // Validate the ID parameter
-  const validationId = params.id;
+  // Validate the ID parameter - using await on params
+  const { id: validationId } = await params;
   if (!validationId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(validationId)) {
     return NextResponse.json(
       { message: 'Invalid validation ID format.' }, 
