@@ -46,12 +46,12 @@ export default function BatchValidationResults({ results, batchInfo }: BatchVali
   const { summary } = batchInfo
   
   // Map ValidationResponse to ValidationDisplayData for active result
-  const mapToDisplayData = (result: ValidationResponse & { originalFile?: string }): ValidationDisplayData => {
+  const mapToDisplayData = (result: ValidationResponse & { originalFile?: string; size?: number }): ValidationDisplayData => {
     return {
       id: result.id,
       valid: result.valid,
       filename: result.originalFile || result.filename || 'Unknown',
-      size: 0, // Size not available in API response
+      size: result.size || 0, // Use size from API response if available
       timestamp: new Date().toISOString(),
       totalSignatures: result.signatures,
       validSignatures: result.validSignatures,

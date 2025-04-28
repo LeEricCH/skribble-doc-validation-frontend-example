@@ -80,14 +80,10 @@ export async function POST(request: Request) {
 
     // Instantiate the API client
     const apiClient = new ValidationApiClient(SKRIBBLE_USERNAME, SKRIBBLE_API_KEY);
-
-    // Process each file and collect validation results
-    console.log(`API Route: Received ${files.length} files for batch validation.`);
     
     const validationResults = await Promise.all(
       files.map(async (file) => {
         try {
-          console.log(`Validating file: ${file.name}`);
           const result = await apiClient.validateDocument(file, validationSettings || {});
           
           // Add filename to result if not present
@@ -95,18 +91,23 @@ export async function POST(request: Request) {
             result.filename = file.name;
           }
           
-          return {
+          const enhancedResult = {
             ...result,
             originalFile: file.name,
+            size: file.size,
             error: null
           };
+          
+          console.log(`Returning validation result with size: ${enhancedResult.size} bytes`);
+          return enhancedResult;
         } catch (error) {
-          console.error(`Error validating file ${file.name}:`, error);
+          console.error(`Error validating file ${file.name}, size: ${file.size} bytes:`, error);
           // Return structured error for this specific file
           return {
             id: `error-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             valid: false,
             originalFile: file.name,
+            size: file.size,
             signatures: 0,
             validSignatures: 0,
             error: error instanceof Error ? error.message : 'Unknown error during validation'
