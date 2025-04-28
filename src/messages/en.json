@@ -124,7 +124,7 @@
     "browse": "browse files",
     "toUpload": "to upload",
     "toUploadMultiple": "to upload documents",
-    "supportedFormats": "PDF",
+    "supportedFormats": "PDF (max. 10)",
     "validating": "Validating Document",
     "validatingBatch": "Validating {count} Documents",
     "validatingDescription": "We're checking the document's signatures and authenticity. This may take a few moments.",
@@ -284,7 +284,10 @@
     "validSignatures": "{count}/{total} signatures valid",
     "viewCertificate": "View Certificate",
     "loading": "Loading...",
-    "clearHistoryConfirm": "Are you sure you want to clear all validation history? This cannot be undone."
+    "clearHistoryConfirm": "Are you sure you want to clear all validation history? This cannot be undone.",
+    "statusValid": "Valid",
+    "statusInvalid": "Invalid",
+    "statusRequirementsNotMet": "Requirements Not Met"
   },
   "Sidebar": {
     "validate": "Validate Document",

@@ -16,7 +16,6 @@ interface DocumentUploaderProps {
 function LoadingSkeleton() {
   return (
     <div className="validator-container">
-      <div className="skeleton-info-box" />
       <div className="card-container skeleton-card">
         <div className="skeleton-content">
           <div className="skeleton-circle" />

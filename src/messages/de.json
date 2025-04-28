@@ -61,7 +61,7 @@
     "browse": "Dateien durchsuchen",
     "toUpload": "zum Hochladen",
     "toUploadMultiple": "zum Hochladen von Dokumenten",
-    "supportedFormats": "PDF",
+    "supportedFormats": "PDF (max. 10)",
     "validating": "Dokument wird validiert",
     "validatingBatch": "Validiere {count} Dokumente",
     "validatingDescription": "Wir überprüfen die Signaturen und Authentizität des Dokuments. Dies kann einen Moment dauern.",

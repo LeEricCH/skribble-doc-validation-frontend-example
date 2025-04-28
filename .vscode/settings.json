@@ -4,5 +4,6 @@
         "src/messages",
         "src/app/settings/language",
         "src/app/[locale]/settings/language"
-    ]
+    ],
+    "i18n-ally.keystyle": "nested"
 }

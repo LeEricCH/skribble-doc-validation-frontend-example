@@ -36,12 +36,11 @@ export default function SignerInfoDisplay({ signers, isLoading }: SignerInfoDisp
 
   return (
     <div className="signers-info-container">
-      <h3 className="section-title">Signature Information</h3>
       <div className="signers-list">
         {signers.map((signer, index) => (
           <div 
             key={`signer-${signer.certificate.serialNumber}-${index}`}
-            className={`signer-card ${signer.valid ? 'valid' : 'invalid'} ${expandedSigner === index ? 'expanded' : ''}`}
+            className={`signer-card ${signer.valid ? 'valid-card' : 'invalid-card'} ${expandedSigner === index ? 'expanded' : ''}`}
           >
             <button 
               type="button"
@@ -69,6 +68,9 @@ export default function SignerInfoDisplay({ signers, isLoading }: SignerInfoDisp
                 <span className={`validation-badge ${signer.valid ? 'valid' : 'invalid'}`}>
                   {signer.valid ? 'Valid' : 'Invalid'} 
                 </span>
+              </div>
+              <div className="expand-indicator">
+                <span className="expand-icon">{expandedSigner === index ? '−' : '+'}</span>
               </div>
             </button>
             
@@ -174,11 +176,11 @@ export default function SignerInfoDisplay({ signers, isLoading }: SignerInfoDisp
           box-shadow: 0 5px 25px rgba(0, 0, 0, 0.12);
         }
         
-        .signer-card.valid {
+        .signer-card.valid-card {
           border-left: 4px solid #27ae60;
         }
         
-        .signer-card.invalid {
+        .signer-card.invalid-card {
           border-left: 4px solid #e74c3c;
         }
         
@@ -188,6 +190,10 @@ export default function SignerInfoDisplay({ signers, isLoading }: SignerInfoDisp
           padding: 1rem 1.5rem;
           cursor: pointer;
           transition: background-color 0.2s ease;
+          width: 100%;
+          border: none;
+          background: transparent;
+          text-align: left;
         }
         
         .signer-header:hover {
@@ -263,6 +269,21 @@ export default function SignerInfoDisplay({ signers, isLoading }: SignerInfoDisp
         .validation-badge.invalid {
           background: rgba(231, 76, 60, 0.15);
           color: #c0392b;
+        }
+        
+        .expand-indicator {
+          margin-left: 1rem;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .expand-icon {
+          font-size: 1.5rem;
+          line-height: 1;
+          color: rgba(0, 0, 0, 0.4);
         }
         
         .signer-details {

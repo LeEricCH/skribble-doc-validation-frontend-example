@@ -57,6 +57,12 @@ export async function POST(request: Request) {
     // Get validation settings from the request if provided
     let validationSettings: ValidationOptions | undefined;
     const settingsJson = formData.get('settings') as string | null;
+
+    // Add to the settings to get all info types
+    validationSettings = {
+      ...validationSettings,
+      infos: ["signer", "validation"]
+    };
     
     if (settingsJson) {
       try {
@@ -80,7 +86,7 @@ export async function POST(request: Request) {
 
     // Instantiate the API client
     const apiClient = new ValidationApiClient(SKRIBBLE_USERNAME, SKRIBBLE_API_KEY);
-    
+
     const validationResults = await Promise.all(
       files.map(async (file) => {
         try {

@@ -7,6 +7,7 @@ export interface ValidationHistoryItem {
   valid: boolean;
   totalSignatures: number;
   validSignatures: number;
+  requirementsNotMet?: boolean;
 }
 
 class ValidationHistoryManager {

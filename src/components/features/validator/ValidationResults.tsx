@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, AlertTriangle, FileCheck, Download, User, Calendar, Award, Globe, ShieldCheck, Mail, User2, Info, HelpCircle } from 'lucide-react'
+import { CheckCircle, AlertTriangle, FileCheck, Download, Info, HelpCircle } from 'lucide-react'
 import type { SignatureQuality, Legislation, SignerInfo } from '@/types/validation';
 import CertificateView from './CertificateView'
+import SignerInfoDisplay from './SignerInfoDisplay'
 import { useTranslations } from 'next-intl'
 import "@/styles/results.css"
 import "@/styles/tooltip.css"
@@ -84,12 +85,24 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
   const t = useTranslations('ValidationResults')
   const ts = useTranslations('SignerInfo')
   const tt = useTranslations('Tooltips')
-  const [expandedSigner, setExpandedSigner] = useState<number | null>(null);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [showCertificate, setShowCertificate] = useState<boolean>(false);
   const [certificateData, setCertificateData] = useState<CertificateData | null>(null);
   
-  if (!validation) return null;
+  // Add console log for debugging
+  console.log("ValidationResults - signerInfo:", signerInfo);
+  console.log("ValidationResults - isLoadingSigners:", isLoadingSigners);
+  console.log("ValidationResults - validation:", validation);
+  
+  if (!validation) {
+    return (
+      <div className="validation-error">
+        <AlertTriangle size={48} className="error-icon" />
+        <h3>{t('noValidation')}</h3>
+        <p>{t('validationDataMissing')}</p>
+      </div>
+    );
+  }
   
   // Use data as an alias for validation to minimize changes in the rest of the component
   const data = validation;
@@ -184,10 +197,6 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
   const totalSignatures = data.totalSignatures;
   const validSignaturesCount = data.validSignatures;
   
-  const toggleExpand = (index: number) => {
-    setExpandedSigner(expandedSigner === index ? null : index);
-  };
-
   const handleDownloadCertificate = async (id: string) => {
     setIsDownloading(true);
     try {
@@ -540,7 +549,7 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
           )}
         </div>
         
-        {/* Signer Information Section */}
+        {/* Replace direct signer rendering with the SignerInfoDisplay component */}
         {isLoadingSigners && (
           <div className="signer-info-loading">
             <div className="loading-spinner" />
@@ -556,135 +565,9 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
                 <HelpCircle size={14} />
               </Tooltip>
             </h4>
-            <div className="signers-list">
-              {signerInfo.map((signer, index) => (
-                <div 
-                  key={`signer-${signer.certificate.serialNumber}-${index}`}
-                  className={`signer-card ${signer.valid ? 'valid-card' : 'invalid-card'} ${expandedSigner === index ? 'expanded' : ''}`}
-                >
-                  <button 
-                    className="signer-header" 
-                    onClick={() => toggleExpand(index)}
-                    type="button"
-                    aria-expanded={expandedSigner === index}
-                  >
-                    <div className="signer-avatar">
-                      <User size={24} color={signer.valid ? '#27ae60' : '#e74c3c'} />
-                    </div>
-                    <div className="signer-summary">
-                      <h4 className="signer-name">{signer.signer}</h4>
-                      <span className="signature-time">{formatDate(signer.time)}</span>
-                    </div>
-                    <div className="signer-badges">
-                      <span className={`quality-badge ${signer.quality.toLowerCase()}`}>
-                        {signer.quality}
-                        <Tooltip content={
-                          signer.quality === 'QES' ? tt('qesSignature') :
-                          signer.quality === 'AES' ? tt('aesSignature') :
-                          tt('sesSignature')
-                        }>
-                          <Info size={12} />
-                        </Tooltip>
-                      </span>
-                      <span className={`validation-badge ${signer.valid ? 'valid' : 'invalid'}`}>
-                        {signer.valid ? t('valid') : t('invalid')} 
-                        <Tooltip content={signer.valid ? 
-                          tt('validSignature') : 
-                          tt('invalidSignature')
-                        }>
-                          <Info size={12} />
-                        </Tooltip>
-                      </span>
-                    </div>
-                    <div className="expand-indicator">
-                      <span className="expand-icon">{expandedSigner === index ? '−' : '+'}</span>
-                    </div>
-                  </button>
-                  
-                  {expandedSigner === index && (
-                    <div className="signer-details">
-                      <div className="detail-row">
-                        <div className="detail-icon"><Calendar size={16} /></div>
-                        <div className="detail-label">{ts('signedOn')}</div>
-                        <div className="detail-value">{formatDate(signer.time)}</div>
-                      </div>
-                      
-                      <div className="detail-row">
-                        <div className="detail-icon"><Award size={16} /></div>
-                        <div className="detail-label">
-                          {ts('signatureQuality')}
-                          <Tooltip content={tt('signatureQualityLevel')}>
-                            <Info size={12} />
-                          </Tooltip>
-                        </div>
-                        <div className="detail-value quality">{signer.quality}</div>
-                      </div>
-                      
-                      <div className="detail-row">
-                        <div className="detail-icon"><Globe size={16} /></div>
-                        <div className="detail-label">
-                          {ts('legislation')}
-                          <Tooltip content={tt('signerLegislation')}>
-                            <Info size={12} />
-                          </Tooltip>
-                        </div>
-                        <div className="detail-value">{signer.legislation}</div>
-                      </div>
-                      
-                      <div className="detail-row">
-                        <div className="detail-icon"><ShieldCheck size={16} /></div>
-                        <div className="detail-label">
-                          {ts('longTermValidation')}
-                          <Tooltip content={tt('signerLongTermValidation')}>
-                            <Info size={12} />
-                          </Tooltip>
-                        </div>
-                        <div className="detail-value">{signer.longTermValidation ? t('yes') : t('no')}</div>
-                      </div>
-                      
-                      {signer.optionalInfos?.contact && (
-                        <div className="detail-row">
-                          <div className="detail-icon"><Mail size={16} /></div>
-                          <div className="detail-label">{ts('contact')}</div>
-                          <div className="detail-value">{signer.optionalInfos.contact}</div>
-                        </div>
-                      )}
-                      
-                      {signer.optionalInfos?.name && (
-                        <div className="detail-row">
-                          <div className="detail-icon"><User2 size={16} /></div>
-                          <div className="detail-label">{ts('displayName')}</div>
-                          <div className="detail-value">{signer.optionalInfos.name}</div>
-                        </div>
-                      )}
-                      
-                      <div className="certificate-section">
-                        <h5>
-                          {ts('certificateInfo')}
-                          <Tooltip content={tt('certificateInfo')}>
-                            <HelpCircle size={12} />
-                          </Tooltip>
-                        </h5>
-                        <div className="certificate-data">
-                          <div className="cert-item">
-                            <span className="cert-label">{ts('subject')}:</span>
-                            <span className="cert-value">{signer.certificate.subject}</span>
-                          </div>
-                          <div className="cert-item">
-                            <span className="cert-label">{ts('issuer')}:</span>
-                            <span className="cert-value">{signer.certificate.issuer}</span>
-                          </div>
-                          <div className="cert-item">
-                            <span className="cert-label">{ts('serialNumber')}:</span>
-                            <span className="cert-value cert-serial">{signer.certificate.serialNumber}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            {/* Log signers right before passing to the component */}
+            {(() => { console.log("About to render SignerInfoDisplay with:", signerInfo); return null; })()}
+            <SignerInfoDisplay signers={signerInfo} isLoading={isLoadingSigners} />
           </div>
         )}
       </div>

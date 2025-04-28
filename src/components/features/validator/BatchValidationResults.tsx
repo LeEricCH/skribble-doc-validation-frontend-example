@@ -1,18 +1,19 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { 
   CheckCircle, 
   XCircle, 
   AlertTriangle, 
   FileCheck, 
-  Info,
-  ChevronRight
+  ChevronRight,
+  AlertCircle
 } from 'lucide-react'
-import type { ValidationResponse, ValidationOptions } from '@/types/validation'
+import type { ValidationResponse, ValidationOptions, SignerInfo } from '@/types/validation'
 import ValidationResults from './ValidationResults'
 import type { ValidationDisplayData } from './ValidationResults'
+import { getValidationStatus } from '@/utils/validationUtils'
 
 interface BatchSummary {
   totalFiles: number
@@ -29,9 +30,46 @@ interface BatchValidationProps {
   }
 }
 
-export default function BatchValidationResults({ results, batchInfo }: BatchValidationProps) {
+export default function BatchValidationResults({ 
+  results, 
+  batchInfo 
+}: BatchValidationProps) {
   const t = useTranslations('ValidationResults')
   const [activeTabIndex, setActiveTabIndex] = useState(0)
+  const [activeDocumentSigners, setActiveDocumentSigners] = useState<SignerInfo[] | null>(null)
+  const [isLoadingActiveSigners, setIsLoadingActiveSigners] = useState(false)
+  
+  // Function to fetch signers for a document by ID
+  const fetchSignersForDocument = useCallback(async (documentId: string | undefined) => {
+    if (!documentId) return
+    
+    setIsLoadingActiveSigners(true)
+    try {
+      const response = await fetch(`/api/signers/${documentId}`)
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch signer info: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      setActiveDocumentSigners(data)
+    } catch (err) {
+      console.error('Error fetching signer info:', err)
+      setActiveDocumentSigners(null)
+    } finally {
+      setIsLoadingActiveSigners(false)
+    }
+  }, [])
+  
+  // Fetch signers when active tab changes
+  useEffect(() => {
+    const activeDocument = results[activeTabIndex]
+    if (activeDocument?.id && !activeDocument.error) {
+      fetchSignersForDocument(activeDocument.id)
+    } else {
+      setActiveDocumentSigners(null)
+    }
+  }, [activeTabIndex, results, fetchSignersForDocument])
   
   if (!results || results.length === 0) {
     return (
@@ -51,7 +89,7 @@ export default function BatchValidationResults({ results, batchInfo }: BatchVali
       id: result.id,
       valid: result.valid,
       filename: result.originalFile || result.filename || 'Unknown',
-      size: result.size || 0, // Use size from API response if available
+      size: result.size || 0,
       timestamp: new Date().toISOString(),
       totalSignatures: result.signatures,
       validSignatures: result.validSignatures,
@@ -68,6 +106,10 @@ export default function BatchValidationResults({ results, batchInfo }: BatchVali
       settingsRejectUndefinedChanges: batchInfo.settings?.rejectUndefinedChanges
     };
   };
+  
+  const handleTabClick = (index: number) => {
+    setActiveTabIndex(index)
+  }
   
   return (
     <div className="batch-validation-container">
@@ -121,13 +163,7 @@ export default function BatchValidationResults({ results, batchInfo }: BatchVali
                   : '0%'}
               </div>
             </div>
-            
-            {batchInfo.settings && (
-              <div className="batch-settings-info">
-                <Info size={14} />
-                <span>{t('batchSettings')}</span>
-              </div>
-            )}
+    
           </div>
         </div>
       </div>
@@ -139,37 +175,45 @@ export default function BatchValidationResults({ results, batchInfo }: BatchVali
         </div>
         
         <div className="document-tabs">
-          {results.map((result, index) => (
-            <button
-              key={result.id || `result-${index}`}
-              className={`document-tab ${activeTabIndex === index ? 'active' : ''}`}
-              onClick={() => setActiveTabIndex(index)}
-              type="button"
-            >
-              <div className="tab-icon">
-                {result.error ? (
-                  <AlertTriangle size={16} className="error-icon" />
-                ) : result.valid ? (
-                  <CheckCircle size={16} className="valid-icon" />
-                ) : (
-                  <XCircle size={16} className="invalid-icon" />
-                )}
-              </div>
-              <div className="tab-content">
-                <div className="tab-filename" title={result.originalFile || result.filename || `Document ${index + 1}`}>
-                  {result.originalFile || result.filename || `Document ${index + 1}`}
+          {results.map((result, index) => {
+            const status = getValidationStatus(result, batchInfo.settings);
+            
+            return (
+              <button
+                key={result.id || `result-${index}`}
+                className={`document-tab ${activeTabIndex === index ? 'active' : ''}`}
+                onClick={() => handleTabClick(index)}
+                type="button"
+              >
+                <div className="tab-icon">
+                  {result.error ? (
+                    <AlertTriangle size={16} className="error-icon" />
+                  ) : result.valid ? (
+                    <CheckCircle size={16} className="valid-icon" />
+                  ) : status === 'requirementsNotMet' ? (
+                    <AlertCircle size={16} className="requirements-icon" />
+                  ) : (
+                    <XCircle size={16} className="invalid-icon" />
+                  )}
                 </div>
-                <div className="tab-status">
-                  {result.error 
-                    ? t('processingError')
-                    : result.valid 
-                      ? t('valid') 
-                      : t('invalid')}
+                <div className="tab-content">
+                  <div className="tab-filename" title={result.originalFile || result.filename || `Document ${index + 1}`}>
+                    {result.originalFile || result.filename || `Document ${index + 1}`}
+                  </div>
+                  <div className="tab-status">
+                    {result.error 
+                      ? t('processingError')
+                      : status === 'valid'
+                        ? t('valid') 
+                        : status === 'requirementsNotMet'
+                          ? t('requirementsNotMet')
+                          : t('invalid')}
+                  </div>
                 </div>
-              </div>
-              <ChevronRight size={16} className="tab-indicator" />
-            </button>
-          ))}
+                <ChevronRight size={16} className="tab-indicator" />
+              </button>
+            );
+          })}
         </div>
       </div>
       
@@ -187,8 +231,8 @@ export default function BatchValidationResults({ results, batchInfo }: BatchVali
         ) : (
           <ValidationResults 
             validation={mapToDisplayData(results[activeTabIndex])} 
-            signerInfo={null}
-            isLoadingSigners={false}
+            signerInfo={activeDocumentSigners}
+            isLoadingSigners={isLoadingActiveSigners}
           />
         )}
       </div>

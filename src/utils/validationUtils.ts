@@ -115,4 +115,66 @@ export function getFailureReasons(
   }
   
   return reasons;
+}
+
+/**
+ * Get the validation status for display purposes
+ * @param isValid Whether the document is valid according to cryptographic checks
+ * @param result Validation result object with all properties
+ * @param settings Validation settings object
+ * @returns String representing the document status: 'valid', 'invalid', or 'requirementsNotMet'
+ */
+export function getValidationStatus(
+  result: {
+    valid: boolean;
+    signatures?: number;
+    validSignatures?: number;
+    quality?: string;
+    legislation?: string;
+    longTermValidation?: boolean;
+    visualDifferences?: boolean;
+    undefinedChanges?: boolean;
+    error?: string | null;
+  },
+  settings?: {
+    quality?: string;
+    legislation?: string;
+    longTermValidation?: boolean;
+    rejectVisualDifferences?: boolean;
+    rejectUndefinedChanges?: boolean;
+  }
+): 'valid' | 'invalid' | 'requirementsNotMet' | 'error' {
+  if (result.error) return 'error';
+  if (result.valid) return 'valid';
+  
+  // Check if document fails due to settings
+  if (settings && 
+      result.validSignatures === result.signatures && 
+      result.signatures && 
+      result.validSignatures &&
+      result.signatures > 0) {
+    
+    // Check individual settings requirements
+    const failedDueToQuality = result.quality && settings.quality && 
+      !isHigherOrEqualQuality(result.quality, settings.quality);
+    
+    const failedDueToLegislation = result.legislation && settings.legislation && 
+      result.legislation !== settings.legislation;
+    
+    const failedDueToLongTermValidation = settings.longTermValidation && 
+      !result.longTermValidation;
+    
+    const failedDueToVisualDifferences = settings.rejectVisualDifferences && 
+      result.visualDifferences;
+    
+    const failedDueToUndefinedChanges = settings.rejectUndefinedChanges && 
+      result.undefinedChanges;
+    
+    if (failedDueToQuality || failedDueToLegislation || failedDueToLongTermValidation || 
+        failedDueToVisualDifferences || failedDueToUndefinedChanges) {
+      return 'requirementsNotMet';
+    }
+  }
+  
+  return 'invalid';
 } 

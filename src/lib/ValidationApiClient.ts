@@ -260,7 +260,6 @@ export class ValidationApiClient {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        // Content-Type is set automatically by fetch for FormData
       },
       body: formData,
     });

@@ -14,6 +14,7 @@ import validationHistory from '@/utils/validationHistory'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import '@/styles/batch-validation.css'
+import { getValidationStatus } from '@/utils/validationUtils'
 
 // Define an interface for our augmented validation data that includes settings
 interface AugmentedValidationData extends ValidationResponse {
@@ -69,28 +70,29 @@ export default function ValidatePage() {
     }
   }, []);
 
-  // Fetch signer information when validation is complete and we have an ID
+  // Fetch signer information when validation is complete and we have an ID (only for single file)
   useEffect(() => {
     async function fetchSignerInfo() {
-      if (!validationComplete || !validationData?.id) {
-        return;
-      }
-      
-      setIsLoadingSigners(true);
-      
-      try {
-        const response = await fetch(`/api/signers/${validationData.id}`);
+      // Only fetch for single file validation
+      if (validationComplete && validationData?.id) {
+        console.log("Fetching signer info for single file validation:", validationData.id);
+        setIsLoadingSigners(true);
         
-        if (!response.ok) {
-          throw new Error(`Failed to fetch signer info: ${response.status}`);
+        try {
+          const response = await fetch(`/api/signers/${validationData.id}`);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch signer info: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          console.log("Received signer info:", data);
+          setSignerInfo(data);
+        } catch (err) {
+          console.error('Error fetching signer info:', err);
+        } finally {
+          setIsLoadingSigners(false);
         }
-        
-        const data = await response.json();
-        setSignerInfo(data);
-      } catch (err) {
-        console.error('Error fetching signer info:', err);
-      } finally {
-        setIsLoadingSigners(false);
       }
     }
     
@@ -142,13 +144,17 @@ export default function ValidatePage() {
         // Add each result to history using for...of loop instead of forEach
         for (const result of data.results) {
           if (result.id && result.originalFile) {
+            // Determine if this is a case of requirements not met
+            const status = getValidationStatus(result, data.batch.settings);
+            
             validationHistory.addToHistory({
               id: result.id,
               filename: result.originalFile,
               timestamp: new Date().toISOString(),
               valid: result.valid,
               totalSignatures: result.signatures,
-              validSignatures: result.validSignatures
+              validSignatures: result.validSignatures,
+              requirementsNotMet: status === 'requirementsNotMet'
             });
           }
         }
@@ -166,6 +172,9 @@ export default function ValidatePage() {
           settings: validationSettings || undefined
         };
         
+        // Determine if this is a case of requirements not met
+        const status = getValidationStatus(singleFileData, validationSettings || undefined);
+        
         // Save to validation history
         validationHistory.addToHistory({
           id: singleFileData.id,
@@ -173,7 +182,8 @@ export default function ValidatePage() {
           timestamp: new Date().toISOString(),
           valid: singleFileData.valid,
           totalSignatures: singleFileData.signatures,
-          validSignatures: singleFileData.validSignatures
+          validSignatures: singleFileData.validSignatures,
+          requirementsNotMet: status === 'requirementsNotMet'
         });
         
         // Update state for single file validation
@@ -230,13 +240,17 @@ export default function ValidatePage() {
   // Save validation to history when validation is complete
   useEffect(() => {
     if (validationComplete && validationData) {
+      // Determine if this is a case of requirements not met
+      const status = getValidationStatus(validationData, validationData.settings);
+      
       validationHistory.addToHistory({
         id: validationData.id,
         filename: validationData.filename,
         timestamp: validationData.validationTimestamp,
         valid: validationData.valid,
         totalSignatures: validationData.signatures,
-        validSignatures: validationData.validSignatures
+        validSignatures: validationData.validSignatures,
+        requirementsNotMet: status === 'requirementsNotMet'
       });
     }
   }, [validationComplete, validationData]);
@@ -375,14 +389,26 @@ export default function ValidatePage() {
       
       {validationComplete && !error && (
         <Box sx={{ mb: 3 }}>
-          {batchValidationData ? (
+          {batchValidationData && batchValidationData.results.length > 1 ? (
             <BatchValidationResults 
               results={batchValidationData.results}
               batchInfo={batchValidationData.batch}
             />
-          ) : validationData && (
+          ) : (
             <ValidationResults 
-              validation={mapToDisplayData(validationData)}
+              validation={
+                batchValidationData && batchValidationData.results.length === 1 
+                  ? mapToDisplayData({
+                      ...batchValidationData.results[0],
+                      filename: batchValidationData.results[0].originalFile || '',
+                      size: ('size' in batchValidationData.results[0]) 
+                        ? (batchValidationData.results[0] as ValidationResponse & { originalFile?: string; size: number }).size 
+                        : 0,
+                      validationTimestamp: new Date().toISOString(),
+                      settings: batchValidationData.batch.settings
+                    })
+                  : validationData ? mapToDisplayData(validationData) : null
+              }
               signerInfo={signerInfo}
               isLoadingSigners={isLoadingSigners}
             />

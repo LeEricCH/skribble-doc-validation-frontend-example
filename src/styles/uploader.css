@@ -251,7 +251,10 @@
   /* Skeleton Loading styles */
   .skeleton-card {
     padding: 24px;
-    height: 160px;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .skeleton-info-box {
@@ -265,8 +268,11 @@
   .skeleton-content {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     align-items: center;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
   }
   
   .skeleton-circle {

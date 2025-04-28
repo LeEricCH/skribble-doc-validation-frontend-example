@@ -125,7 +125,7 @@
     "browse": "parcourir les fichiers",
     "toUpload": "pour télécharger",
     "toUploadMultiple": "pour télécharger des documents",
-    "supportedFormats": "PDF",
+    "supportedFormats": "PDF (max. 10)",
     "validating": "Validation du document",
     "validatingBatch": "Validation de {count} documents",
     "validatingDescription": "Nous vérifions les signatures et l'authenticité du document. Cela peut prendre quelques instants.",

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button, Paper, Typography, Box, IconButton, Chip } from '@mui/material'
-import { History, Trash2, CheckCircle, AlertTriangle, Clock, FileText, Search, RefreshCw, Eye } from 'lucide-react'
+import { History, Trash2, CheckCircle, AlertTriangle, Clock, FileText, Search, RefreshCw, Eye, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import MainContent from '@/components/layout/MainContent'
 import validationHistory, { type ValidationHistoryItem } from '@/utils/validationHistory'
@@ -123,6 +123,68 @@ export default function HistoryPage() {
     setSelectedValidation(null)
   }
 
+  // Function to determine if requirements are not met (for backward compatibility)
+  const isRequirementsNotMet = (item: ValidationHistoryItem): boolean => {
+    // If the flag is explicitly set, use it
+    if (item.requirementsNotMet !== undefined) {
+      return item.requirementsNotMet;
+    }
+    
+    // Fall back to checking if all signatures are valid but document is invalid
+    // This is a best guess for older history entries
+    return !item.valid && 
+           item.validSignatures === item.totalSignatures && 
+           item.totalSignatures > 0;
+  };
+
+  // Function to determine the appropriate icon for a validation item
+  const getStatusIcon = (item: ValidationHistoryItem) => {
+    if (item.valid) {
+      return <CheckCircle size={28} color="#27ae60" />;
+    }
+    
+    if (isRequirementsNotMet(item)) {
+      return <AlertCircle size={28} color="#f59e0b" />;
+    }
+    
+    return <AlertTriangle size={28} color="#e74c3c" />;
+  };
+  
+  // Function to get appropriate color for status chip
+  const getStatusColor = (item: ValidationHistoryItem) => {
+    if (item.valid) {
+      return {
+        bg: 'rgba(39, 174, 96, 0.1)',
+        text: '#27ae60'
+      };
+    }
+    
+    if (isRequirementsNotMet(item)) {
+      return {
+        bg: 'rgba(245, 158, 11, 0.1)',
+        text: '#f59e0b'
+      };
+    }
+    
+    return {
+      bg: 'rgba(231, 76, 60, 0.1)',
+      text: '#e74c3c'
+    };
+  };
+
+  // Function to get status text for display
+  const getStatusText = (item: ValidationHistoryItem): string => {
+    if (item.valid) {
+      return t('statusValid');
+    }
+    
+    if (isRequirementsNotMet(item)) {
+      return t('statusRequirementsNotMet');
+    }
+    
+    return t('statusInvalid');
+  };
+
   return (
     <MainContent
       title={t('title')}
@@ -161,7 +223,7 @@ export default function HistoryPage() {
                 variant="outlined"
                 size="small"
                 startIcon={<RefreshCw size={16} />}
-                onClick={() => router.push('/validate')}
+                onClick={() => router.push('/')}
                 sx={{
                   borderColor: 'rgba(0,0,0,0.2)',
                   color: 'rgba(0,0,0,0.7)',
@@ -224,15 +286,12 @@ export default function HistoryPage() {
                   className={`history-item ${selectedValidation === item.id ? 'selected' : ''}`}
                 >
                   <div className="item-icon">
-                    {item.valid ? 
-                      <CheckCircle size={28} color="#27ae60" /> : 
-                      <AlertTriangle size={28} color="#e74c3c" />
-                    }
+                    {getStatusIcon(item)}
                   </div>
                   <div className="item-content">
                     <div className="item-header">
                       <h3 className="item-filename">
-                        {item.filename}
+                        <div className="item-filename-text">{item.filename}</div>
                       </h3>
                     </div>
                     <div className="item-details">
@@ -246,8 +305,8 @@ export default function HistoryPage() {
                           label={t('validSignatures', { count: item.validSignatures, total: item.totalSignatures })}
                           sx={{ 
                             fontSize: '0.75rem',
-                            bgcolor: item.valid ? 'rgba(39, 174, 96, 0.1)' : 'rgba(231, 76, 60, 0.1)',
-                            color: item.valid ? '#27ae60' : '#e74c3c',
+                            bgcolor: getStatusColor(item).bg,
+                            color: getStatusColor(item).text,
                             height: '24px',
                             '& .MuiChip-label': { px: 1 }
                           }}
@@ -351,9 +410,42 @@ export default function HistoryPage() {
           font-size: 1.15rem;
           font-weight: 500;
           color: rgba(0, 0, 0, 0.85);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+        }
+        
+        .item-filename-text {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+        
+        .status-badge {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 3px 8px;
+          border-radius: 12px;
+          white-space: nowrap;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          flex-shrink: 0;
+        }
+        
+        .status-badge.valid {
+          background-color: rgba(39, 174, 96, 0.1);
+          color: #27ae60;
+        }
+        
+        .status-badge.invalid {
+          background-color: rgba(231, 76, 60, 0.1);
+          color: #e74c3c;
+        }
+        
+        .status-badge.requirements {
+          background-color: rgba(245, 158, 11, 0.1);
+          color: #f59e0b;
         }
         
         .item-actions {

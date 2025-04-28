@@ -200,6 +200,10 @@
   color: #ef4444;
 }
 
+.requirements-icon {
+  color: #f59e0b;
+}
+
 .error-icon {
   color: #f59e0b;
 }
@@ -222,6 +226,25 @@
 .tab-status {
   font-size: 12px;
   color: #6b7280;
+}
+
+.document-tab.active .tab-status {
+  font-weight: 500;
+}
+
+.document-tab .valid-icon + .tab-content .tab-status {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.document-tab .invalid-icon + .tab-content .tab-status {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+.document-tab .requirements-icon + .tab-content .tab-status {
+  color: #f59e0b;
+  font-weight: 500;
 }
 
 .tab-indicator {
