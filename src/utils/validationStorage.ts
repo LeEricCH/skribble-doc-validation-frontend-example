@@ -105,7 +105,7 @@ class ValidationStorage {
       this.updateBatchRegistry(batchData.batch.id, batchData.batch.timestamp, validationIds);
       
       // Also save each individual validation with a reference to this batch
-      batchData.results.forEach(result => {
+      for (const result of batchData.results) {
         if (result.id) {
           this.saveValidationData(result.id, {
             ...result,
@@ -113,7 +113,7 @@ class ValidationStorage {
             timestamp: batchData.batch.timestamp
           });
         }
-      });
+      }
     } catch (err) {
       console.error('Error saving batch validation data to localStorage:', err);
     }
