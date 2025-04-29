@@ -29,6 +29,7 @@ interface BatchValidationProps {
     settings?: ValidationOptions | undefined
   }
   onDocumentClick?: (docId: string) => void
+  resultIndex?: number | null
 }
 
 // Document Selection Component
@@ -212,9 +213,10 @@ function DocumentSelectionSidebar({
 export default function BatchValidationResults({ 
   results, 
   batchInfo,
+  resultIndex
 }: BatchValidationProps) {
   const t = useTranslations('ValidationResults')
-  const [activeTabIndex, setActiveTabIndex] = useState(0)
+  const [activeTabIndex, setActiveTabIndex] = useState(resultIndex || 0)
   const [activeDocumentSigners, setActiveDocumentSigners] = useState<SignerInfo[] | null>(null)
   const [isLoadingActiveSigners, setIsLoadingActiveSigners] = useState(false)
   
@@ -249,6 +251,13 @@ export default function BatchValidationResults({
       setActiveDocumentSigners(null)
     }
   }, [activeTabIndex, results, fetchSignersForDocument])
+  
+  // Update active tab when resultIndex prop changes
+  useEffect(() => {
+    if (resultIndex !== null && resultIndex !== undefined && resultIndex >= 0 && resultIndex < results.length) {
+      setActiveTabIndex(resultIndex);
+    }
+  }, [resultIndex, results.length]);
   
   if (!results || results.length === 0) {
     return (

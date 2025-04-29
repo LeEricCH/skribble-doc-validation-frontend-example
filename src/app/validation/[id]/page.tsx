@@ -51,6 +51,7 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
     errorFiles: number; 
   } | null>(null)
   const [batchSettings, setBatchSettings] = useState<ValidationOptions | undefined>(undefined)
+  const [batchResultIndex, setBatchResultIndex] = useState<number | null>(null)
   
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -99,6 +100,12 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
                 setBatchSummary(batchData.batch.summary);
                 setBatchSettings(batchData.batch.settings);
                 
+                // Find the index of the current validation in the batch and pass it to BatchValidationResults
+                const currentResultIndex = batchData.results.findIndex(r => r.id === validationId);
+                if (currentResultIndex > -1) {
+                  setBatchResultIndex(currentResultIndex);
+                }
+                
                 // Store the batch ID for potential future API calls or navigation
                 console.log(`Using batch ID ${validateBatchId} for validation ${validationId}`);
               } else {
@@ -116,6 +123,13 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
                 setBatchResults(batchData.results);
                 setBatchSummary(batchData.batch.summary);
                 setBatchSettings(batchData.batch.settings);
+                
+                // Find the index of the current validation in the batch and pass it to BatchValidationResults
+                const currentResultIndex = batchData.results.findIndex(r => r.id === validationId);
+                if (currentResultIndex > -1) {
+                  setBatchResultIndex(currentResultIndex);
+                }
+                
                 console.log(`Using legacy batch ID ${legacyBatchId} for validation ${validationId}`);
               } else {
                 setIsBatchValidation(false);
@@ -302,6 +316,7 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
                 summary: batchSummary,
                 settings: batchSettings
               }}
+              resultIndex={batchResultIndex}
             />
           ) : (
             <ValidationResults 
