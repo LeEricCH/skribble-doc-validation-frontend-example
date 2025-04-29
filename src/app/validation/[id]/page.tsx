@@ -100,7 +100,7 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
             } else {
               // Legacy support for the old batch=true query param
               const batchData = validationStorage.getBatchValidationData();
-              if (batchData && batchData.results.some(r => r.id === validationId)) {
+              if (batchData?.results?.some(r => r.id === validationId)) {
                 const legacyBatchId = batchData.batch.id || `legacy-batch-${Date.now()}`;
                 setBatchId(legacyBatchId);
                 setBatchResults(batchData.results);
