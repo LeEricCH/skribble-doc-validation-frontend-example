@@ -11,6 +11,11 @@
   "Validator": {
     "title": "Document Validation",
     "description": "Upload documents to verify their signatures and authenticity",
+    "resultsTitle": "Validation Results",
+    "resultsDescription": "View detailed validation results for this document",
+    "loadingResults": "Loading Validation Results",
+    "loadingDescription": "Please wait while we retrieve the validation details...",
+    "back": "Back",
     "errorTitle": "Validation Error",
     "errorHelp": "- Please try again or check the document.",
     "contactSupport": "Need help?",
@@ -49,7 +54,8 @@
     "validatingDocument": "Validating Document",
     "validatingBatch": "Validating {count} Documents",
     "validatingDescription": "We're checking the signatures and authenticity. This may take a few moments.",
-    "processingFiles": "Processing your files..."
+    "processingFiles": "Processing your files...",
+    "unknownError": "An unknown error occurred"
   },
   "ValidationSettings": {
     "title": "Validation Settings",
@@ -201,7 +207,11 @@
     "file": "File",
     "unknown": "Unknown",
     "noResults": "No Results Available",
-    "noResultsDescription": "There were no results returned from the validation process."
+    "noResultsDescription": "There were no results returned from the validation process.",
+    "downloadReport": "Download Report",
+    "reportTitle": "Validation Report",
+    "reportDescription": "Download a complete PDF report of this validation, including all signatures and technical details.",
+    "generating": "Generating..."
   },
   "SignerInfo": {
     "title": "Signature Information",
@@ -290,7 +300,16 @@
     "clearHistoryConfirm": "Are you sure you want to clear all validation history? This cannot be undone.",
     "statusValid": "Valid",
     "statusInvalid": "Invalid",
-    "statusRequirementsNotMet": "Requirements Not Met"
+    "statusRequirementsNotMet": "Requirements Not Met",
+    "status": "Status",
+    "document": "Document",
+    "date": "Date",
+    "signatures": "Signatures",
+    "actions": "Actions",
+    "viewResults": "View",
+    "validDocument": "Valid Document",
+    "invalidDocument": "Invalid Document",
+    "requirementsNotMet": "Requirements Not Met"
   },
   "Sidebar": {
     "validate": "Validate Document",
@@ -343,7 +362,8 @@
     "signerLongTermValidation": "Indicates if this signature includes data for long-term verification beyond certificate expiration.",
     "certificateInfo": "Technical details about the digital certificate used to create this signature.",
     "validationCertificate": "A downloadable certificate that proves this document was validated by Paperflow.",
-    "technicalDetails": "Technical validation details including signature format, trust chain, and cryptographic security information."
+    "technicalDetails": "Technical validation details including signature format, trust chain, and cryptographic security information.",
+    "validationReport": "Download a PDF report containing all validation details for your records"
   },
   "ValidationHistory": {
     "title": "Validation History",

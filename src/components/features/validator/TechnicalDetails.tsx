@@ -558,7 +558,7 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ validationId }) => 
           </Accordion>
         </div>
         
-        <div className="technical-footer">
+        <div className="technical-footer no-print">
           <Button
             variant="outlined"
             startIcon={<FileDown size={16} />}

@@ -28,11 +28,12 @@ interface BatchValidationProps {
     summary: BatchSummary
     settings?: ValidationOptions | undefined
   }
+  onDocumentClick?: (docId: string) => void
 }
 
 export default function BatchValidationResults({ 
   results, 
-  batchInfo 
+  batchInfo,
 }: BatchValidationProps) {
   const t = useTranslations('ValidationResults')
   const [activeTabIndex, setActiveTabIndex] = useState(0)

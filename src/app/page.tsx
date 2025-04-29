@@ -5,24 +5,13 @@ import { Button, Alert, AlertTitle, Box, Paper } from '@mui/material'
 import { FileCheck, RefreshCw, History, Loader2 } from 'lucide-react'
 import MainContent from '@/components/layout/MainContent'
 import DocumentUploader from '@/components/features/validator/DocumentUploader'
-import ValidationResults from '@/components/features/validator/ValidationResults'
-import BatchValidationResults from '@/components/features/validator/BatchValidationResults'
 import ValidationSettingsPanel from '@/components/features/validator/ValidationSettingsPanel'
-import type { ValidationResponse, SignerInfo, ValidationOptions } from '@/types/validation'
-import type { ValidationDisplayData } from '@/components/features/validator/ValidationResults'
+import type { ValidationResponse, ValidationOptions } from '@/types/validation'
 import validationHistory from '@/utils/validationHistory'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import '@/styles/batch-validation.css'
 import { getValidationStatus } from '@/utils/validationUtils'
-
-// Define an interface for our augmented validation data that includes settings
-interface AugmentedValidationData extends ValidationResponse {
-  filename: string;
-  size: number;
-  validationTimestamp: string;
-  settings?: ValidationOptions;
-}
 
 // Batch validation result type
 interface BatchValidationResult {
@@ -41,16 +30,92 @@ interface BatchValidationResult {
   })[];
 }
 
+// Define the type for stored validation data
+interface StoredValidationData {
+  [id: string]: ValidationResponse & { 
+    filename?: string;
+    size?: number;
+    validationTimestamp?: string;
+    settings?: ValidationOptions;
+    [key: string]: unknown;  // Add index signature to make compatible with Record<string, unknown>
+  };
+}
+
+// Create a new validation storage service to store complete validation data
+const validationStorage = {
+  // Store complete validation data
+  saveValidationData: (id: string, data: ValidationResponse & Record<string, unknown>): void => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      // Get existing validation data
+      const existingDataStr = localStorage.getItem('validationData') || '{}';
+      const existingData = JSON.parse(existingDataStr) as StoredValidationData;
+      
+      // Add new validation data
+      existingData[id] = data;
+      
+      // Save back to localStorage
+      localStorage.setItem('validationData', JSON.stringify(existingData));
+      console.log(`Saved complete validation data for ID: ${id}`);
+    } catch (err) {
+      console.error('Error saving validation data to localStorage:', err);
+    }
+  },
+  
+  // Save batch validation data
+  saveBatchValidationData: (batchData: BatchValidationResult): void => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem('batchValidationData', JSON.stringify(batchData));
+      console.log('Saved batch validation data to localStorage');
+    } catch (err) {
+      console.error('Error saving batch validation data to localStorage:', err);
+    }
+  },
+  
+  // Get batch validation data
+  getBatchValidationData: (): BatchValidationResult | null => {
+    if (typeof window === 'undefined') return null;
+    
+    try {
+      const dataStr = localStorage.getItem('batchValidationData');
+      if (!dataStr) return null;
+      return JSON.parse(dataStr) as BatchValidationResult;
+    } catch (err) {
+      console.error('Error getting batch validation data from localStorage:', err);
+      return null;
+    }
+  },
+  
+  // Get validation data by ID
+  getValidationData: (id: string): (ValidationResponse & Record<string, unknown>) | null => {
+    if (typeof window === 'undefined') return null;
+    
+    try {
+      const dataStr = localStorage.getItem('validationData') || '{}';
+      const data = JSON.parse(dataStr) as StoredValidationData;
+      return data[id] || null;
+    } catch (err) {
+      console.error('Error getting validation data from localStorage:', err);
+      return null;
+    }
+  },
+  
+  // Clear all validation data
+  clearValidationData: (): void => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('validationData');
+  }
+};
+
 export default function ValidatePage() {
   const t = useTranslations('Validator')
   const [isValidating, setIsValidating] = useState(false)
   const [validationComplete, setValidationComplete] = useState(false)
-  const [validationData, setValidationData] = useState<AugmentedValidationData | null>(null)
-  const [batchValidationData, setBatchValidationData] = useState<BatchValidationResult | null>(null)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [signerInfo, setSignerInfo] = useState<SignerInfo[] | null>(null)
-  const [isLoadingSigners, setIsLoadingSigners] = useState(false)
   const router = useRouter()
   
   // Get validation settings from localStorage if available
@@ -70,57 +135,12 @@ export default function ValidatePage() {
     }
   }, []);
 
-  // Fetch signer information when validation is complete and we have an ID
-  useEffect(() => {
-    async function fetchSignerInfo() {
-      // Check if we have either a single file validation or a batch with one file
-      const shouldFetchSingle = validationComplete && validationData?.id;
-      const shouldFetchBatchSingle = validationComplete && batchValidationData && 
-                                 batchValidationData.results?.length === 1 && 
-                                 batchValidationData.results[0].id;
-      
-      let validationId: string | undefined;
-      
-      if (shouldFetchSingle && validationData) {
-        validationId = validationData.id;
-      } else if (shouldFetchBatchSingle && batchValidationData && batchValidationData.results[0]) {
-        validationId = batchValidationData.results[0].id;
-      }
-      
-      if (validationId) {
-        console.log("Fetching signer info for validation:", validationId);
-        setIsLoadingSigners(true);
-        
-        try {
-          const response = await fetch(`/api/signers/${validationId}`);
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch signer info: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          console.log("Received signer info:", data);
-          setSignerInfo(data);
-        } catch (err) {
-          console.error('Error fetching signer info:', err);
-        } finally {
-          setIsLoadingSigners(false);
-        }
-      }
-    }
-    
-    fetchSignerInfo();
-  }, [validationComplete, validationData, batchValidationData]);
-
   const handleUpload = async () => {
     if (selectedFiles.length === 0) return;
     
     setIsValidating(true);
     setError(null);
     setValidationComplete(false);
-    setValidationData(null);
-    setBatchValidationData(null);
-    setSignerInfo(null);
     
     try {
       // Create form data
@@ -151,56 +171,11 @@ export default function ValidatePage() {
       
       // Check if this is a batch validation response
       if (data.batch && Array.isArray(data.results)) {
-        // Handle batch validation response
-        setBatchValidationData(data);
-        
-        // Add each result to history using for...of loop instead of forEach
-        for (const result of data.results) {
-          if (result.id && result.originalFile) {
-            // Determine if this is a case of requirements not met
-            const status = getValidationStatus(result, data.batch.settings);
-            
-            validationHistory.addToHistory({
-              id: result.id,
-              filename: result.originalFile,
-              timestamp: new Date().toISOString(),
-              valid: result.valid,
-              totalSignatures: result.signatures,
-              validSignatures: result.validSignatures,
-              requirementsNotMet: status === 'requirementsNotMet'
-            });
-          }
-        }
-        
+        // Handle batch validation
+        handleBatchValidation(data as BatchValidationResult);
       } else {
-        // Single file validation - for backward compatibility
-        const singleFileData = data as ValidationResponse;
-        
-        // Add additional metadata to the validation response
-        const augmentedData: AugmentedValidationData = {
-          ...singleFileData,
-          filename: selectedFiles[0].name,
-          size: selectedFiles[0].size,
-          validationTimestamp: new Date().toISOString(),
-          settings: validationSettings || undefined
-        };
-        
-        // Determine if this is a case of requirements not met
-        const status = getValidationStatus(singleFileData, validationSettings || undefined);
-        
-        // Save to validation history
-        validationHistory.addToHistory({
-          id: singleFileData.id,
-          filename: selectedFiles[0].name,
-          timestamp: new Date().toISOString(),
-          valid: singleFileData.valid,
-          totalSignatures: singleFileData.signatures,
-          validSignatures: singleFileData.validSignatures,
-          requirementsNotMet: status === 'requirementsNotMet'
-        });
-        
-        // Update state for single file validation
-        setValidationData(augmentedData);
+        // Single file validation
+        await handleSingleValidation(data as ValidationResponse);
       }
       
       setValidationComplete(true);
@@ -212,61 +187,92 @@ export default function ValidatePage() {
       setIsValidating(false);
     }
   };
-
-  const resetValidation = () => {
-    setValidationComplete(false)
-    setValidationData(null)
-    setBatchValidationData(null)
-    setSelectedFiles([])
-    setError(null)
-    setSignerInfo(null)
-    setValidationSettings(null)
-  }
-
-  // Modify mapToDisplayData to include settings from the response
-  const mapToDisplayData = (data: AugmentedValidationData): ValidationDisplayData => {
-    // Use settings from the response if available, otherwise use local settings
-    const displaySettings = data.settings || validationSettings || {};
-    
-    return {
-      id: data.id,
-      valid: data.valid,
-      filename: data.filename,
-      size: data.size,
-      timestamp: data.validationTimestamp,
-      totalSignatures: data.signatures,
-      validSignatures: data.validSignatures,
-      quality: data.quality,
-      legislation: data.legislation,
-      longTermValidation: data.longTermValidation,
-      visualDifferences: data.visualDifferences,
-      undefinedChanges: data.undefinedChanges,
-      // Add validation settings
-      settingsQuality: displaySettings.quality,
-      settingsLegislation: displaySettings.legislation,
-      settingsLongTermValidation: displaySettings.longTermValidation,
-      settingsRejectVisualDifferences: displaySettings.rejectVisualDifferences,
-      settingsRejectUndefinedChanges: displaySettings.rejectUndefinedChanges
+  
+  // Handle single file validation
+  const handleSingleValidation = async (validationResponse: ValidationResponse) => {
+    // Add additional metadata to the validation response
+    const augmentedData = {
+      ...validationResponse,
+      filename: selectedFiles[0].name,
+      size: selectedFiles[0].size,
+      validationTimestamp: new Date().toISOString(),
+      settings: validationSettings || undefined
     };
+    
+    // Determine if this is a case of requirements not met
+    const status = getValidationStatus(validationResponse, validationSettings || undefined);
+    
+    // Save to validation history
+    validationHistory.addToHistory({
+      id: validationResponse.id,
+      filename: selectedFiles[0].name,
+      timestamp: new Date().toISOString(),
+      valid: validationResponse.valid,
+      totalSignatures: validationResponse.signatures,
+      validSignatures: validationResponse.validSignatures,
+      requirementsNotMet: status === 'requirementsNotMet'
+    });
+    
+    // Save full validation data to localStorage
+    validationStorage.saveValidationData(validationResponse.id, augmentedData);
+    
+    // After saving, redirect to validation results page
+    router.push(`/validation/${validationResponse.id}`);
+  };
+  
+  // Handle batch validation response
+  const handleBatchValidation = (batchData: BatchValidationResult) => {
+    console.log("Processing batch validation results:", batchData.results.length);
+    
+    // Save the batch data for access in the validation page
+    validationStorage.saveBatchValidationData(batchData);
+    
+    // Add each result to history and storage
+    for (const result of batchData.results) {
+      if (result.id && result.originalFile) {
+        // Determine if this is a case of requirements not met
+        const status = getValidationStatus(result, batchData.batch.settings);
+        
+        // Add to history
+        validationHistory.addToHistory({
+          id: result.id,
+          filename: result.originalFile,
+          timestamp: new Date().toISOString(),
+          valid: result.valid,
+          totalSignatures: result.signatures,
+          validSignatures: result.validSignatures,
+          requirementsNotMet: status === 'requirementsNotMet'
+        });
+        
+        // Augment data with additional info
+        const augmentedData = {
+          ...result,
+          filename: result.originalFile,
+          validationTimestamp: new Date().toISOString(),
+          settings: batchData.batch.settings
+        };
+        
+        // Save full validation data to localStorage
+        validationStorage.saveValidationData(result.id, augmentedData);
+      }
+    }
+    
+    // For batch validation with results, redirect to the first validation result
+    if (batchData.results.length > 0 && batchData.results[0].id) {
+      // Redirect to the first result, with a query param to indicate this is part of a batch
+      router.push(`/validation/${batchData.results[0].id}?batch=true`);
+    } else {
+      // Fallback to history if no results
+      router.push('/history');
+    }
   };
 
-  // Save validation to history when validation is complete
-  useEffect(() => {
-    if (validationComplete && validationData) {
-      // Determine if this is a case of requirements not met
-      const status = getValidationStatus(validationData, validationData.settings);
-      
-      validationHistory.addToHistory({
-        id: validationData.id,
-        filename: validationData.filename,
-        timestamp: validationData.validationTimestamp,
-        valid: validationData.valid,
-        totalSignatures: validationData.signatures,
-        validSignatures: validationData.validSignatures,
-        requirementsNotMet: status === 'requirementsNotMet'
-      });
-    }
-  }, [validationComplete, validationData]);
+  const resetValidation = () => {
+    setValidationComplete(false);
+    setSelectedFiles([]);
+    setError(null);
+    setValidationSettings(null);
+  };
 
   return (
     <MainContent
@@ -384,46 +390,6 @@ export default function ValidatePage() {
               }}
             >
               {isValidating ? t('validating') : selectedFiles.length > 1 ? t('validateBatch') : t('validate')}
-            </Button>
-          </Box>
-        </Box>
-      )}
-      
-      {validationComplete && !error && (
-        <Box sx={{ mb: 3 }}>
-          {batchValidationData && batchValidationData.results.length > 1 ? (
-            <BatchValidationResults 
-              results={batchValidationData.results}
-              batchInfo={batchValidationData.batch}
-            />
-          ) : (
-            <ValidationResults 
-              validation={
-                batchValidationData && batchValidationData.results.length === 1 
-                  ? mapToDisplayData({
-                      ...batchValidationData.results[0],
-                      filename: batchValidationData.results[0].originalFile || '',
-                      size: ('size' in batchValidationData.results[0]) 
-                        ? (batchValidationData.results[0] as ValidationResponse & { originalFile?: string; size: number }).size 
-                        : 0,
-                      validationTimestamp: new Date().toISOString(),
-                      settings: batchValidationData.batch.settings
-                    })
-                  : validationData ? mapToDisplayData(validationData) : null
-              }
-              signerInfo={signerInfo}
-              isLoadingSigners={isLoadingSigners}
-            />
-          )}
-          
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <Button 
-              variant="contained" 
-              startIcon={<RefreshCw size={16} />}
-              onClick={resetValidation}
-              sx={{ px: 4, py: 1.5 }}
-            >
-              {t('validateAnother')}
             </Button>
           </Box>
         </Box>

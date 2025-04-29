@@ -11,6 +11,11 @@
   "Validator": {
     "title": "Dokumentenvalidierung",
     "description": "Laden Sie Dokumente hoch, um deren Signaturen und Authentizität zu überprüfen",
+    "resultsTitle": "Validierungsergebnisse",
+    "resultsDescription": "Detaillierte Validierungsergebnisse für dieses Dokument anzeigen",
+    "loadingResults": "Validierungsergebnisse werden geladen",
+    "loadingDescription": "Bitte warten Sie, während wir die Validierungsdetails abrufen...",
+    "back": "Zurück",
     "subtitle": "Laden Sie ein Dokument hoch, um seine Signaturen und Authentizität zu überprüfen",
     "errorTitle": "Validierungsfehler",
     "errorHelp": "- Bitte versuchen Sie es erneut oder überprüfen Sie das Dokument.",
@@ -50,7 +55,8 @@
     "validatingDocument": "Dokument wird validiert",
     "validatingBatch": "Validiere {count} Dokumente",
     "validatingDescription": "Wir überprüfen die Signaturen und Authentizität. Dies kann einen Moment dauern.",
-    "processingFiles": "Ihre Dateien werden verarbeitet..."
+    "processingFiles": "Ihre Dateien werden verarbeitet...",
+    "unknownError": "Ein unbekannter Fehler ist aufgetreten"
   },
   "DocumentUploader": {
     "info": "Laden Sie signierte Dokumente hoch, um deren digitale Signaturen und Authentizität zu überprüfen.",
@@ -137,7 +143,11 @@
     "file": "Datei",
     "unknown": "Unbekannt",
     "noResults": "Keine Ergebnisse verfügbar",
-    "noResultsDescription": "Es wurden keine Ergebnisse vom Validierungsprozess zurückgegeben."
+    "noResultsDescription": "Es wurden keine Ergebnisse vom Validierungsprozess zurückgegeben.",
+    "downloadReport": "Bericht herunterladen",
+    "reportTitle": "Validierungsbericht",
+    "reportDescription": "Laden Sie einen vollständigen PDF-Bericht dieser Validierung herunter, einschließlich aller Signaturen und technischen Details.",
+    "generating": "Wird generiert..."
   },
   "SignerInfo": {
     "title": "Signaturinformationen",
@@ -226,7 +236,16 @@
     "clearHistoryConfirm": "Sind Sie sicher, dass Sie den gesamten Validierungsverlauf löschen möchten? Dies kann nicht rückgängig gemacht werden.",
     "statusValid": "Gültig",
     "statusInvalid": "Ungültig",
-    "statusRequirementsNotMet": "Anforderungen nicht erfüllt"
+    "statusRequirementsNotMet": "Anforderungen nicht erfüllt",
+    "status": "Status",
+    "document": "Dokument",
+    "date": "Datum",
+    "signatures": "Signaturen",
+    "actions": "Aktionen",
+    "viewResults": "Anzeigen",
+    "validDocument": "Gültiges Dokument",
+    "invalidDocument": "Ungültiges Dokument",
+    "requirementsNotMet": "Anforderungen nicht erfüllt"
   },
   "Sidebar": {
     "validate": "Dokument prüfen",
@@ -344,7 +363,8 @@
     "signerLongTermValidation": "Zeigt an, ob diese Signatur Daten für die langfristige Überprüfung nach Ablauf des Zertifikats enthält.",
     "certificateInfo": "Technische Details zum digitalen Zertifikat, das zum Erstellen dieser Signatur verwendet wurde.",
     "validationCertificate": "Ein herunterladbares Zertifikat, das beweist, dass dieses Dokument von Paperflow validiert wurde.",
-    "technicalDetails": "Technische Validierungsdetails einschließlich Signaturformat, Vertrauenskette und kryptografische Sicherheitsinformationen."
+    "technicalDetails": "Technische Validierungsdetails einschließlich Signaturformat, Vertrauenskette und kryptografische Sicherheitsinformationen.",
+    "validationReport": "Laden Sie einen PDF-Bericht mit allen Validierungsdetails für Ihre Unterlagen herunter"
   },
   "ValidationHistory": {
     "title": "Validierungsverlauf",

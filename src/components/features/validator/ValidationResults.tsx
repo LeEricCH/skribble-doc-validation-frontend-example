@@ -1,18 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircle, AlertTriangle, FileCheck, Download, Info, HelpCircle } from 'lucide-react'
+import { CheckCircle, AlertTriangle, FileCheck, Info, HelpCircle } from 'lucide-react'
 import type { SignatureQuality, Legislation, SignerInfo } from '@/types/validation';
-import CertificateView from './CertificateView'
 import SignerInfoDisplay from './SignerInfoDisplay'
 import TechnicalDetails from './TechnicalDetails'
 import { useTranslations } from 'next-intl'
+import ReportCard from './ReportCard'
 import "@/styles/results.css"
 import "@/styles/tooltip.css"
 import { isHigherOrEqualQuality, isLegislationCompliant } from '@/utils/validationUtils'
 
 // Helper component for tooltips
-interface TooltipProps {
+export interface TooltipProps {
   content: string;
   children: React.ReactNode;
 }
@@ -27,32 +27,6 @@ const Tooltip = ({ content, children }: TooltipProps) => {
     </div>
   );
 };
-
-// Interface for certificate data that matches the CertificateView component's requirements
-interface CertificateData {
-  id: string;
-  timestamp: string;
-  validation: {
-    id: string;
-    valid: boolean;
-    signatures: number;
-    validSignatures: number;
-    quality?: string;
-    legislation?: string;
-    longTermValidation?: boolean;
-    visualDifferences?: boolean;
-    undefinedChanges?: boolean;
-    timestamp: string;
-    filename: string;
-  };
-  signers: SignerInfo[];
-}
-
-// Interface for failure reason items
-interface FailureReason {
-  id: string;
-  text: string;
-}
 
 // New, simplified type for the data structure this component needs
 export interface ValidationDisplayData {
@@ -87,9 +61,6 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
   const t = useTranslations('ValidationResults')
   const ts = useTranslations('SignerInfo')
   const tt = useTranslations('Tooltips')
-  const [isDownloading, setIsDownloading] = useState<boolean>(false);
-  const [showCertificate, setShowCertificate] = useState<boolean>(false);
-  const [certificateData, setCertificateData] = useState<CertificateData | null>(null);
   const [processedValidation, setProcessedValidation] = useState<ValidationDisplayData | null>(null);
   
   // Process validation data to correct any issues
@@ -175,7 +146,7 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
      failedDueToUndefinedChanges);
 
   // Prepare failure reasons for display
-  const failureReasons: FailureReason[] = [];
+  const failureReasons = [];
   if (failedDueToQuality && data.quality && data.settingsQuality) {
     failureReasons.push({
       id: 'quality',
@@ -227,64 +198,9 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
   // Use the pre-calculated counts passed in props
   const totalSignatures = data.totalSignatures;
   const validSignaturesCount = data.validSignatures;
-  
-  const handleDownloadCertificate = async (id: string) => {
-    setIsDownloading(true);
-    try {
-      // Fetch certificate data from API with the filename
-      const response = await fetch(`/api/certificate/${id}?filename=${encodeURIComponent(data.filename)}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch certificate data');
-      }
-      
-      const certData = await response.json();
-
-      // Ensure the data is in the correct format
-      if (certData?.validation) {
-        // Make sure the validation data has the correct values
-        const isValid = certData.validation.indication === "TOTAL-PASSED" || 
-                        certData.validation.valid === true;
-        
-        // Get signature counts from signers if available
-        const signatureCount = certData.signers?.length || 0;
-        const validSignatureCount = certData.signers?.filter((signer: SignerInfo) => signer.valid).length || 0;
-        
-        const certificateWithValidData: CertificateData = {
-          ...certData,
-          validation: {
-            ...certData.validation,
-            valid: isValid,
-            signatures: certData.validation.signatures || signatureCount,
-            validSignatures: certData.validation.validSignatures || validSignatureCount,
-          },
-          signers: certData.signers || []
-        };
-        
-        // Show certificate in modal
-        setCertificateData(certificateWithValidData);
-        setShowCertificate(true);
-      } else {
-        throw new Error('Invalid certificate data format received');
-      }
-    } catch (error) {
-      console.error('Error fetching certificate:', error);
-      alert('There was an error generating the certificate. Please try again.');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  const closeCertificate = () => {
-    setShowCertificate(false);
-  };
 
   return (
     <div className="validation-results">
-      {/* Show certificate modal when data is available */}
-      {showCertificate && certificateData && (
-        <CertificateView data={certificateData} onClose={closeCertificate} />
-      )}
-      
       <div className="results-header">
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginBottom: '1.5rem' }}>
           <div className={`status-badge big-badge ${data.valid ? 'valid' : (failedDueToSettingsOnly ? 'settings-mismatch' : 'invalid')}`}
@@ -306,16 +222,6 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
               </>
             )}
           </div>
-          {/* <button 
-            type="button"
-            className="certificate-button" 
-            onClick={() => handleDownloadCertificate(data.id)}
-            disabled={isDownloading}
-            style={{ margin: '0 auto', minWidth: 220, fontSize: '1.1rem', padding: '0.85rem 2.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Download size={20} />
-            <span style={{ marginLeft: 10 }}>{isDownloading ? 'Loading...' : t('certButtonTitle')}</span>
-          </button> */}
         </div>
       </div>
       
@@ -601,45 +507,17 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
         )}
       </div>
       
-      {/* Add Technical Details Card */}
+      {/* Technical Details Card - Adding no-print class for PDF generation */}
       <div className="results-card technical-card">
         <TechnicalDetails validationId={data.id} />
       </div>
       
-      <div className="results-card certificate-card">
-        <h3 className="card-title">
-          {t('viewDetails')}
-          <Tooltip content={tt('validationCertificate')}>
-            <HelpCircle size={16} />
-          </Tooltip>
-        </h3>
-        <div className="certificate-content">
-          <div className="certificate-icon">
-            <FileCheck size={32} color="#e74c3c" />
-          </div>
-          <h4 className="certificate-title">{t('certificateTitle')}</h4>
-          
-          <p className="certificate-description">
-            {t('certificateDescription')}
-          </p>
-          
-          <div className="certificate-id">
-            <span className="id-label">{t('validationID')}</span>
-            <span className="id-value">{data.id}</span>
-          </div>
-          
-          <button 
-            type="button"
-            className="download-button"
-            onClick={() => handleDownloadCertificate(data.id)}
-            disabled={isDownloading}
-            title="Download Certificate"
-          >
-            <Download size={18} />
-            <span>{isDownloading ? 'Generating...' : t('certButtonTitle')}</span>
-          </button>
-        </div>
-      </div>
+      {/* Replace certificate card with Report Card */}
+      <ReportCard 
+        validationId={data.id}
+        filename={data.filename}
+        Tooltip={Tooltip}
+      />
     </div>
   );
 } 

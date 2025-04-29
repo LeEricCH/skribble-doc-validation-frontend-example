@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { 
   FileCheck, 
   Download, 
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { handleCertificateExport } from '@/utils/exportUtils'
-import { getFailureReasons, isFailedDueToSettings, isHigherOrEqualQuality } from '@/utils/validationUtils'
+import { getFailureReasons, isFailedDueToSettings, isHigherOrEqualQuality, isLegislationCompliant } from '@/utils/validationUtils'
 import type { CertificateData } from '@/types/certificate'
 import TechnicalDetails from './TechnicalDetails'
 import "@/styles/certificate.css"
@@ -32,13 +32,60 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false)
   const [showTechnicalDetails, setShowTechnicalDetails] = useState<boolean>(false)
   
+  // Extract data from props
   const {
     id: certificateId,
     timestamp: generationTime,
-    validation,
+    validation: originalValidation,
     signers
   } = data
   
+  // Process validation to handle special cases like CH_EU legislation
+  const [processedValidation, setProcessedValidation] = useState(originalValidation)
+  
+  useEffect(() => {
+    // Create a copy to modify
+    const updatedValidation = { ...originalValidation }
+    
+    const {
+      valid,
+      signatures,
+      validSignatures,
+      quality,
+      legislation,
+      longTermValidation,
+      visualDifferences,
+      undefinedChanges,
+      settings
+    } = updatedValidation
+    
+    // Check if document should be valid based on legislation
+    if (!valid && 
+        legislation && 
+        settings?.legislation === 'CH_EU' &&
+        (legislation === 'CH' || legislation === 'EU') &&
+        validSignatures === signatures && 
+        signatures > 0) {
+      
+      // Check if no other validation criteria failed
+      const onlyFailedDueToLegislation = 
+        !(settings?.quality && 
+          quality && 
+          !isHigherOrEqualQuality(quality, settings.quality)) &&
+        !(settings?.longTermValidation && !longTermValidation) &&
+        !(settings?.rejectVisualDifferences && visualDifferences) &&
+        !(settings?.rejectUndefinedChanges && undefinedChanges);
+      
+      if (onlyFailedDueToLegislation) {
+        updatedValidation.valid = true;
+        updatedValidation.requirementsNotMet = false;
+      }
+    }
+    
+    setProcessedValidation(updatedValidation);
+  }, [originalValidation]);
+  
+  // Extract all needed fields from the processed validation
   const {
     id: validationId,
     valid,
@@ -51,8 +98,10 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
     undefinedChanges,
     timestamp: validationTime,
     filename,
-    settings
-  } = validation
+    settings,
+    requirementsNotMet,
+    details
+  } = processedValidation
 
   // Get translations for failure reasons
   const translations = {
@@ -80,13 +129,13 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
   )
   
   // Check if the API has already determined requirements not met status
-  const showRequirementsNotMet = validation.requirementsNotMet || 
+  const showRequirementsNotMet = requirementsNotMet || 
     (failedDueToSettingsOnly && validSignatures === signatures && signatures > 0)
 
   // Extract failure details from the validation response if settings are missing
   let failureDetails: string[] = [];
-  if (validation.requirementsNotMet && validation.details && Array.isArray(validation.details)) {
-    failureDetails = validation.details;
+  if (requirementsNotMet && details && Array.isArray(details)) {
+    failureDetails = details;
   }
   
   // Get failure reasons
@@ -306,7 +355,7 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
                     <span className="info-value">
                       {legislation}
                       {settings?.legislation && (
-                        <span className={`setting-requirement ${legislation !== settings.legislation ? 'not-met' : ''}`}>
+                        <span className={`setting-requirement ${!isLegislationCompliant(legislation, settings.legislation) ? 'not-met' : ''}`}>
                           ({t('required')}: {settings.legislation})
                         </span>
                       )}
