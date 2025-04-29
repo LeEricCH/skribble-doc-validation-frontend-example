@@ -29,16 +29,6 @@ export async function verifyTurnstile({
     return { success: true };
   }
   
-  // Check if we're in development mode
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  console.log('Running in environment:', process.env.NODE_ENV || 'undefined');
-  
-  // In development mode, we can bypass verification if needed
-  if (isDevelopment && process.env.TURNSTILE_DEV_BYPASS === 'true') {
-    console.log('Development mode: bypassing Turnstile verification');
-    return { success: true };
-  }
-  
   // Get token from request
   let token = '';
   
@@ -64,14 +54,14 @@ export async function verifyTurnstile({
   if (!token) {
     console.log('Turnstile token is empty');
     
-    // Special case for production: For certain endpoints, like signature creation,
-    // we might want to bypass verification if we're getting multiple calls
-    if (process.env.NODE_ENV === 'production' && 
-        request.url.includes('/api/signing/create-request')) {
+    // Special case for signature creation - check referer to ensure it's coming from our app
+    if (request.url.includes('/api/signing/create-request')) {
       // Check if there are any other indicators that this is a legitimate request
       const referer = request.headers.get('referer') || '';
-      if (referer.includes(process.env.NEXT_PUBLIC_BASE_URL || '')) {
-        console.log('Production mode: Accepting signature creation without token as referer is valid');
+      // Check if the referer is from our site
+      const host = request.headers.get('host') || '';
+      if (referer.includes(host)) {
+        console.log('Accepting signature creation without token from valid referer');
         return { success: true };
       }
     }
@@ -85,15 +75,9 @@ export async function verifyTurnstile({
     };
   }
   
-  // In development mode, if we have a token but no secret key or bypass is true,
-  // we'll just validate that the token exists and is of sufficient length
-  if (isDevelopment && 
-      (process.env.TURNSTILE_DEV_MODE === 'true' || !process.env.TURNSTILE_SECRET_KEY)) {
-    console.log('Development mode: accepting token without Cloudflare verification');
-    // Just check that token has a reasonable length to be valid
-    if (token.length > 30) {
-      return { success: true };
-    }
+  // If secret key is not configured, accept any token of sufficient length
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    throw new Error('Turnstile secret key is not configured');
   }
   
   try {
@@ -127,19 +111,11 @@ export async function verifyTurnstile({
     
     if (!verifyResult.success) {
       // Check if the error is just a timeout or duplicate token
-      if (verifyResult['error-codes']?.includes('timeout-or-duplicate')) {
-        // For signature creation, we can accept tokens even if they're duplicates
-        // This helps in cases where network issues might cause duplicate submissions
-        if (request.url.includes('/api/signing/create-request')) {
-          console.log('Accepting timeout-or-duplicate token for signature creation');
-          return { success: true };
-        }
-        
-        // In development mode, we can accept tokens that are just duplicates
-        if (isDevelopment) {
-          console.log('Development mode: accepting duplicate/expired token');
-          return { success: true };
-        }
+      // Accept timeout-or-duplicate errors globally for signature creation
+      if (verifyResult['error-codes']?.includes('timeout-or-duplicate') && 
+          request.url.includes('/api/signing/create-request')) {
+        console.log('Accepting timeout-or-duplicate token for signature creation');
+        return { success: true };
       }
       
       return {

@@ -19,6 +19,9 @@ export async function POST(request: NextRequest) {
     // Parse the request body
     const body = await request.json();
     const { pdfBase64, email, mobileNumber, language, turnstileToken } = body;
+    
+    console.log('[create-request] Token received length:', turnstileToken?.length || 0);
+    console.log('[create-request] Referer:', request.headers.get('referer') || 'none');
 
     // Ensure required fields are provided
     if (!pdfBase64 || !email) {
