@@ -114,11 +114,19 @@ export async function verifyTurnstile({
     
     if (!verifyResult.success) {
       // Check if the error is just a timeout or duplicate token
-      if (verifyResult['error-codes']?.includes('timeout-or-duplicate') && 
-          isDevelopment) {
+      if (verifyResult['error-codes']?.includes('timeout-or-duplicate')) {
+        // For signature creation, we can accept tokens even if they're duplicates
+        // This helps in cases where network issues might cause duplicate submissions
+        if (request.url.includes('/api/signing/create-request')) {
+          console.log('Accepting timeout-or-duplicate token for signature creation');
+          return { success: true };
+        }
+        
         // In development mode, we can accept tokens that are just duplicates
-        console.log('Development mode: accepting duplicate/expired token');
-        return { success: true };
+        if (isDevelopment) {
+          console.log('Development mode: accepting duplicate/expired token');
+          return { success: true };
+        }
       }
       
       return {

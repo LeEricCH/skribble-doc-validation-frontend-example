@@ -240,6 +240,9 @@ function OnboardingContent() {
       const turnstileToken = localStorage.getItem('turnstileToken') || '';
       console.log('Retrieved token from localStorage, token length:', turnstileToken.length);
       
+      // Clear the token immediately after use to prevent reuse
+      localStorage.removeItem('turnstileToken');
+      
       // Create signature request
       const response = await fetch('/api/signing/create-request', {
         method: 'POST',
@@ -484,29 +487,13 @@ function OnboardingContent() {
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
                 onVerify={async (token) => {
                   try {
-                    // Verify the token with our API endpoint
-                    const response = await fetch('/api/turnstile/verify', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({ token }),
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                      setTurnstileVerified(true);
-                      setError(null);
-                      // Store the token in localStorage for use with API calls
-                      localStorage.setItem('turnstileToken', token);
-                    } else {
-                      setError(data.error || "Verification failed. Please try again.");
-                      setTurnstileVerified(false);
-                    }
+                    // Don't verify the token here - just store it and let the backend verify it
+                    localStorage.setItem('turnstileToken', token);
+                    setTurnstileVerified(true);
+                    setError(null);
                   } catch (err) {
-                    console.error('Error verifying Turnstile token:', err);
-                    setError("An error occurred during verification. Please try again.");
+                    console.error('Error handling Turnstile token:', err);
+                    setError("An error occurred. Please try again.");
                     setTurnstileVerified(false);
                   }
                 }}
