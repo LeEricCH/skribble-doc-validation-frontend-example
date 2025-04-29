@@ -296,4 +296,57 @@ export class ValidationApiClient {
       },
     });
   }
+
+  /**
+   * Gets the ETSI TS 119 102-2 signature validation report as XML
+   * This provides detailed technical validation information in a standardized format
+   */
+  public async getEtsiValidationReport(validationId: string): Promise<string> {
+    const token = await this.login(); // Ensure we have a valid token
+    
+    console.log(`Fetching ETSI validation report for ID: ${validationId}`);
+    
+    // Custom handling since the response is XML, not JSON
+    const url = `${this.baseUrl}/reports/${validationId}/etsi`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/xml',
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        let errorDetail: Record<string, unknown> | string | undefined;
+        try {
+          // Try to read as text since it might be error message
+          const text = await response.text();
+          errorDetail = text;
+        } catch (textError) {
+          errorDetail = `Failed to read error response: ${textError instanceof Error ? textError.message : String(textError)}`;
+        }
+        
+        const apiError: ApiErrorResponse = {
+          status: response.status,
+          message: response.statusText,
+          error: typeof errorDetail === 'string' ? { detail: errorDetail } : errorDetail,
+        };
+        console.error('API Error fetching ETSI report:', JSON.stringify(apiError, null, 2));
+        throw apiError;
+      }
+      
+      return await response.text();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      console.error('Error fetching ETSI report:', error);
+      throw error;
+    }
+  }
 } 

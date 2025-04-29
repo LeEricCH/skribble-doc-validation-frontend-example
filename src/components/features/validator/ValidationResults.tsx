@@ -5,6 +5,7 @@ import { CheckCircle, AlertTriangle, FileCheck, Download, Info, HelpCircle } fro
 import type { SignatureQuality, Legislation, SignerInfo } from '@/types/validation';
 import CertificateView from './CertificateView'
 import SignerInfoDisplay from './SignerInfoDisplay'
+import TechnicalDetails from './TechnicalDetails'
 import { useTranslations } from 'next-intl'
 import "@/styles/results.css"
 import "@/styles/tooltip.css"
@@ -570,6 +571,11 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
             <SignerInfoDisplay signers={signerInfo} isLoading={isLoadingSigners} />
           </div>
         )}
+      </div>
+      
+      {/* Add Technical Details Card */}
+      <div className="results-card technical-card">
+        <TechnicalDetails validationId={data.id} />
       </div>
       
       <div className="results-card certificate-card">

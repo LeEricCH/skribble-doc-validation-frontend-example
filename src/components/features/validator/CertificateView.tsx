@@ -9,12 +9,14 @@ import {
   Award, 
   Globe,
   XCircle,
-  AlertTriangle
+  AlertTriangle,
+  FileCode
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { handleCertificateExport } from '@/utils/exportUtils'
 import { getFailureReasons, isFailedDueToSettings, isHigherOrEqualQuality } from '@/utils/validationUtils'
 import type { CertificateData } from '@/types/certificate'
+import TechnicalDetails from './TechnicalDetails'
 import "@/styles/certificate.css"
 
 interface CertificateViewProps {
@@ -28,6 +30,7 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
   const t = useTranslations('Certificate');
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false)
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState<boolean>(false)
   
   const {
     id: certificateId,
@@ -145,6 +148,14 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
         <div className="certificate-header">
           <h2 id="certificate-title">{t('title')}</h2>
           <div className="certificate-actions">
+            <button
+              type="button"
+              className="technical-button"
+              onClick={() => setShowTechnicalDetails(prev => !prev)}
+            >
+              <FileCode size={16} />
+              <span>{showTechnicalDetails ? t('hideTechnicalDetails') : t('showTechnicalDetails')}</span>
+            </button>
             <div className="dropdown-container">
               <button
                 type="button"
@@ -414,6 +425,11 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
             <p>{t('generatedOn')} {formatDate(generationTime)} {t('by')}</p>
             <p>{t('certificateID')} {certificateId}</p>
           </div>
+          
+          {/* Technical details section */}
+          {showTechnicalDetails && (
+            <TechnicalDetails validationId={validationId} />
+          )}
         </div>
       </dialog>
 
@@ -527,6 +543,7 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
           padding: 2rem;
           overflow-y: auto;
           background-color: #f5f5f5;
+          max-height: 80vh;
         }
         
         .certificate-title {
@@ -821,6 +838,23 @@ export default function CertificateView({ data, onClose }: CertificateViewProps)
           .detail-label {
             width: auto;
           }
+        }
+        
+        .technical-button {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          border: none;
+          border-radius: 4px;
+          background-color: #2980b9;
+          color: white;
+          font-weight: 500;
+          cursor: pointer;
+        }
+        
+        .technical-button:hover {
+          background-color: #3498db;
         }
       `}</style>
     </div>

@@ -223,6 +223,8 @@
     "downloadPDF": "PDF",
     "downloadPNG": "PNG",
     "close": "Fermer",
+    "showTechnicalDetails": "Détails techniques",
+    "hideTechnicalDetails": "Masquer les détails techniques",
     "validatorName": "Paperflow Validator",
     "validDocument": "DOCUMENT VALIDE",
     "invalidDocument": "DOCUMENT INVALIDE",
@@ -286,7 +288,10 @@
     "validSignatures": "{count}/{total} signatures valides",
     "viewCertificate": "Voir le certificat",
     "loading": "Chargement...",
-    "clearHistoryConfirm": "Êtes-vous sûr de vouloir effacer tout l'historique de validation ? Cette action ne peut pas être annulée."
+    "clearHistoryConfirm": "Êtes-vous sûr de vouloir effacer tout l'historique de validation ? Cette action ne peut pas être annulée.",
+    "statusValid": "Valide",
+    "statusInvalid": "Invalide",
+    "statusRequirementsNotMet": "Exigences non satisfaites"
   },
   "Sidebar": {
     "validate": "Valider un document",
@@ -338,7 +343,8 @@
     "signerLegislation": "Le cadre réglementaire sous lequel cette signature est évaluée.",
     "signerLongTermValidation": "Indique si cette signature inclut des données pour une vérification à long terme au-delà de l'expiration du certificat.",
     "certificateInfo": "Détails techniques sur le certificat numérique utilisé pour créer cette signature.",
-    "validationCertificate": "Un certificat téléchargeable qui prouve que ce document a été validé par Paperflow."
+    "validationCertificate": "Un certificat téléchargeable qui prouve que ce document a été validé par Paperflow.",
+    "technicalDetails": "Détails techniques de validation comprenant le format de signature, la chaîne de confiance et les informations de sécurité cryptographique."
   },
   "ValidationHistory": {
     "title": "Historique de validation",
@@ -360,5 +366,66 @@
     "deleteEntryConfirm": "Êtes-vous sûr de vouloir supprimer cette entrée ?",
     "deleteEntrySuccess": "Entrée supprimée avec succès",
     "deleteEntryError": "Échec de la suppression de l'entrée"
+  },
+  "TechnicalDetails": {
+    "title": "Détails techniques",
+    "loading": "Chargement des détails techniques...",
+    "error": "Erreur lors du chargement du rapport technique",
+    "reportUnavailable": "Les données du rapport technique ne sont pas disponibles",
+    "tryViewReport": "Essayer de consulter le rapport",
+    "reportDescription": "Ce rapport fournit des détails techniques de validation sur les signatures du document, y compris la sécurité cryptographique et le statut de confiance.",
+    "overallScore": "Score global",
+    "summaryTitle": "Résumé de validation",
+    "trustChain": "Chaîne de confiance",
+    "validationProcess": "Processus de validation",
+    "certificateTrust": "Confiance du certificat",
+    "cryptographicSecurity": "Sécurité cryptographique",
+    "secureAlgorithms": "Algorithmes sécurisés",
+    "securityIssues": "Problèmes de sécurité",
+    "algorithmsAnalyzed": "{count} algorithmes analysés",
+    "validTrustChain": "Chaîne de confiance valide",
+    "trustIssues": "Problèmes de confiance",
+    "oneTrustAnchor": "1 ancre de confiance vérifiée",
+    "multipleTrustAnchors": "{count} ancres de confiance vérifiées",
+    "validationConstraints": "Contraintes de validation",
+    "passed": "réussi",
+    "total": "total",
+    "validatedAt": "Validé le",
+    "viewDetailedReport": "Voir le rapport détaillé",
+    "downloadRawReport": "Télécharger le rapport",
+    "validationTimeline": "Chronologie de validation",
+    "unknownTime": "Heure inconnue",
+    "noTrustChain": "Aucune information de chaîne de confiance disponible",
+    "noTimelineEvents": "Aucun événement de chronologie disponible",
+    "noConstraints": "Aucune contrainte de validation disponible",
+    "noValidationDetails": "Aucun détail de validation disponible",
+    "notAvailable": "Non disponible",
+    "statusPassed": "VALIDE",
+    "statusFailed": "INVALIDE",
+    "statusIndeterminate": "EXIGENCES NON SATISFAITES",
+    "errorLoadingDetails": "Erreur lors du chargement des détails",
+    "validation": {
+      "timeTitle": "Temps de validation",
+      "timeDescription": "Heure à laquelle le document a été validé"
+    },
+    "signature": {
+      "timeTitle": "Temps de signature",
+      "timeDescription": "Meilleur temps de signature avec type de preuve :"
+    },
+    "chainNode": {
+      "signer": "Signataire",
+      "trustAnchor": "Ancre de confiance",
+      "certificate": "Certificat"
+    },
+    "scoreItems": {
+      "validationConstraints": "Contraintes de validation",
+      "constraintsDescription": "{count} sur {total} contraintes de validation réussies",
+      "cryptographicSecurity": "Sécurité cryptographique",
+      "cryptographicDescription": "{count} sur {total} algorithmes cryptographiques sont sécurisés",
+      "signatureAttributes": "Attributs de signature",
+      "attributesDescription": "{count} sur {total} attributs sont signés",
+      "signatureFormat": "Format de signature",
+      "formatDescription": "Format de signature d'archivage à long terme (longévité maximale)"
+    }
   }
 } 

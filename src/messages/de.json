@@ -158,6 +158,8 @@
     "downloadPDF": "PDF",
     "downloadPNG": "PNG",
     "close": "Schließen",
+    "showTechnicalDetails": "Technische Details",
+    "hideTechnicalDetails": "Technische Details ausblenden",
     "validatorName": "Paperflow Validator",
     "validDocument": "GÜLTIGES DOKUMENT",
     "invalidDocument": "UNGÜLTIGES DOKUMENT",
@@ -221,7 +223,10 @@
     "validSignatures": "{count}/{total} Signaturen gültig",
     "viewCertificate": "Zertifikat anzeigen",
     "loading": "Wird geladen...",
-    "clearHistoryConfirm": "Sind Sie sicher, dass Sie den gesamten Validierungsverlauf löschen möchten? Dies kann nicht rückgängig gemacht werden."
+    "clearHistoryConfirm": "Sind Sie sicher, dass Sie den gesamten Validierungsverlauf löschen möchten? Dies kann nicht rückgängig gemacht werden.",
+    "statusValid": "Gültig",
+    "statusInvalid": "Ungültig",
+    "statusRequirementsNotMet": "Anforderungen nicht erfüllt"
   },
   "Sidebar": {
     "validate": "Dokument prüfen",
@@ -338,7 +343,8 @@
     "signerLegislation": "Der rechtliche Rahmen, unter dem diese Signatur bewertet wird.",
     "signerLongTermValidation": "Zeigt an, ob diese Signatur Daten für die langfristige Überprüfung nach Ablauf des Zertifikats enthält.",
     "certificateInfo": "Technische Details zum digitalen Zertifikat, das zum Erstellen dieser Signatur verwendet wurde.",
-    "validationCertificate": "Ein herunterladbares Zertifikat, das beweist, dass dieses Dokument von Paperflow validiert wurde."
+    "validationCertificate": "Ein herunterladbares Zertifikat, das beweist, dass dieses Dokument von Paperflow validiert wurde.",
+    "technicalDetails": "Technische Validierungsdetails einschließlich Signaturformat, Vertrauenskette und kryptografische Sicherheitsinformationen."
   },
   "ValidationHistory": {
     "title": "Validierungsverlauf",
@@ -360,5 +366,66 @@
     "deleteEntryConfirm": "Sind Sie sicher, dass Sie diesen Eintrag löschen möchten?",
     "deleteEntrySuccess": "Eintrag erfolgreich gelöscht",
     "deleteEntryError": "Fehler beim Löschen des Eintrags"
+  },
+  "TechnicalDetails": {
+    "title": "Technische Details",
+    "loading": "Technische Details werden geladen...",
+    "error": "Fehler beim Laden des technischen Berichts",
+    "reportUnavailable": "Technische Berichtsdaten sind nicht verfügbar",
+    "tryViewReport": "Versuchen Sie, den Bericht anzuzeigen",
+    "reportDescription": "Dieser Bericht liefert technische Validierungsdetails zu den Dokumentensignaturen, einschließlich kryptografischer Sicherheit und Vertrauensstatus.",
+    "overallScore": "Gesamtbewertung",
+    "summaryTitle": "Validierungszusammenfassung",
+    "trustChain": "Vertrauenskette",
+    "validationProcess": "Validierungsprozess",
+    "certificateTrust": "Zertifikatsvertrauen",
+    "cryptographicSecurity": "Kryptografische Sicherheit",
+    "secureAlgorithms": "Sichere Algorithmen",
+    "securityIssues": "Sicherheitsprobleme",
+    "algorithmsAnalyzed": "{count} Algorithmen analysiert",
+    "validTrustChain": "Gültige Vertrauenskette",
+    "trustIssues": "Vertrauensprobleme",
+    "oneTrustAnchor": "1 Vertrauensanker verifiziert",
+    "multipleTrustAnchors": "{count} Vertrauensanker verifiziert",
+    "validationConstraints": "Validierungseinschränkungen",
+    "passed": "bestanden",
+    "total": "gesamt",
+    "validatedAt": "Validiert am",
+    "viewDetailedReport": "Detaillierten Bericht anzeigen",
+    "downloadRawReport": "Report herunterladen",
+    "validationTimeline": "Validierungszeitlinie",
+    "unknownTime": "Unbekannte Zeit",
+    "noTrustChain": "Keine Vertrauensketteninformationen verfügbar",
+    "noTimelineEvents": "Keine Zeitlinienereignisse verfügbar",
+    "noConstraints": "Keine Validierungseinschränkungen verfügbar",
+    "noValidationDetails": "Keine Validierungsdetails verfügbar",
+    "notAvailable": "Nicht verfügbar",
+    "statusPassed": "GÜLTIG",
+    "statusFailed": "UNGÜLTIG",
+    "statusIndeterminate": "ANFORDERUNGEN NICHT ERFÜLLT",
+    "errorLoadingDetails": "Fehler beim Laden der Details",
+    "validation": {
+      "timeTitle": "Validierungszeit",
+      "timeDescription": "Zeitpunkt, an dem das Dokument validiert wurde"
+    },
+    "signature": {
+      "timeTitle": "Signaturzeit",
+      "timeDescription": "Beste Signaturzeit mit Beweistyp:"
+    },
+    "chainNode": {
+      "signer": "Unterzeichner",
+      "trustAnchor": "Vertrauensanker",
+      "certificate": "Zertifikat"
+    },
+    "scoreItems": {
+      "validationConstraints": "Validierungseinschränkungen",
+      "constraintsDescription": "{count} von {total} Validierungseinschränkungen bestanden",
+      "cryptographicSecurity": "Kryptografische Sicherheit",
+      "cryptographicDescription": "{count} von {total} kryptografischen Algorithmen sind sicher",
+      "signatureAttributes": "Signaturattribute",
+      "attributesDescription": "{count} von {total} Attributen sind signiert",
+      "signatureFormat": "Signaturformat",
+      "formatDescription": "Langzeitarchivierungssignaturformat (maximale Langlebigkeit)"
+    }
   }
 } 

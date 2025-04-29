@@ -221,7 +221,11 @@
     "title": "Document Validation Certificate",
     "downloadPDF": "PDF",
     "downloadPNG": "PNG",
+    "download": "Download",
+    "generating": "Generating...",
     "close": "Close",
+    "showTechnicalDetails": "Technical Details",
+    "hideTechnicalDetails": "Hide Technical Details",
     "validatorName": "Paperflow Validator",
     "validDocument": "VALID DOCUMENT",
     "invalidDocument": "INVALID DOCUMENT",
@@ -251,9 +255,7 @@
     "generatedOn": "Generated on",
     "by": "by Paperflow Validator",
     "certificateID": "Certificate ID:",
-    "download": "Download",
     "view": "View",
-    "generating": "Generating...",
     "failureReasons": "Validation Requirements Not Met",
     "qualityRequirement": "Required Quality",
     "legislationRequirement": "Required Legislation",
@@ -340,7 +342,8 @@
     "signerLegislation": "The regulatory framework under which this signature is evaluated.",
     "signerLongTermValidation": "Indicates if this signature includes data for long-term verification beyond certificate expiration.",
     "certificateInfo": "Technical details about the digital certificate used to create this signature.",
-    "validationCertificate": "A downloadable certificate that proves this document was validated by Paperflow."
+    "validationCertificate": "A downloadable certificate that proves this document was validated by Paperflow.",
+    "technicalDetails": "Technical validation details including signature format, trust chain, and cryptographic security information."
   },
   "ValidationHistory": {
     "title": "Validation History",
@@ -362,5 +365,66 @@
     "deleteEntryConfirm": "Are you sure you want to delete this entry?",
     "deleteEntrySuccess": "Entry deleted successfully",
     "deleteEntryError": "Failed to delete entry"
+  },
+  "TechnicalDetails": {
+    "title": "Technical Details",
+    "loading": "Loading technical details...",
+    "error": "Error loading technical report",
+    "reportUnavailable": "Technical report data is not available",
+    "tryViewReport": "Try to view report",
+    "reportDescription": "This report provides technical validation details about the document signatures, including cryptographic security and trust status.",
+    "overallScore": "Overall Score",
+    "summaryTitle": "Validation Summary",
+    "trustChain": "Trust Chain",
+    "validationProcess": "Validation Process",
+    "certificateTrust": "Certificate Trust",
+    "cryptographicSecurity": "Cryptographic Security",
+    "secureAlgorithms": "Secure Algorithms",
+    "securityIssues": "Security Issues",
+    "algorithmsAnalyzed": "{count} algorithms analyzed",
+    "validTrustChain": "Valid Trust Chain",
+    "trustIssues": "Trust Issues",
+    "oneTrustAnchor": "1 trust anchor verified",
+    "multipleTrustAnchors": "{count} trust anchors verified",
+    "validationConstraints": "Validation Constraints",
+    "passed": "passed",
+    "total": "total",
+    "validatedAt": "Validated at",
+    "viewDetailedReport": "View Detailed Report",
+    "downloadRawReport": "Download Raw Report",
+    "validationTimeline": "Validation Timeline",
+    "unknownTime": "Unknown time",
+    "noTrustChain": "No trust chain information available",
+    "noTimelineEvents": "No timeline events available",
+    "noConstraints": "No validation constraints available",
+    "noValidationDetails": "No validation details available",
+    "notAvailable": "Not available",
+    "statusPassed": "VALID",
+    "statusFailed": "INVALID",
+    "statusIndeterminate": "REQUIREMENTS NOT MET",
+    "errorLoadingDetails": "Error Loading Details",
+    "validation": {
+      "timeTitle": "Validation Time",
+      "timeDescription": "Time when the document was validated"
+    },
+    "signature": {
+      "timeTitle": "Signature Time",
+      "timeDescription": "Best signature time with proof type:"
+    },
+    "chainNode": {
+      "signer": "Signer",
+      "trustAnchor": "Trust Anchor",
+      "certificate": "Certificate"
+    },
+    "scoreItems": {
+      "validationConstraints": "Validation Constraints",
+      "constraintsDescription": "{count} of {total} validation constraints passed",
+      "cryptographicSecurity": "Cryptographic Security",
+      "cryptographicDescription": "{count} of {total} cryptographic algorithms are secure",
+      "signatureAttributes": "Signature Attributes",
+      "attributesDescription": "{count} of {total} attributes are signed",
+      "signatureFormat": "Signature Format",
+      "formatDescription": "Long-Term Archival signature format (maximum longevity)"
+    }
   }
 } 
