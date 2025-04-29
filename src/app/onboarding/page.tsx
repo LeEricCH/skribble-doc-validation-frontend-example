@@ -240,9 +240,6 @@ function OnboardingContent() {
       const turnstileToken = localStorage.getItem('turnstileToken') || '';
       console.log('Retrieved token from localStorage, token length:', turnstileToken.length);
       
-      // Clear the token immediately after use to prevent reuse
-      localStorage.removeItem('turnstileToken');
-      
       // Create signature request
       const response = await fetch('/api/signing/create-request', {
         method: 'POST',
@@ -264,6 +261,9 @@ function OnboardingContent() {
       }
       
       const data = await response.json();
+      
+      // Clear the token after successful request
+      localStorage.removeItem('turnstileToken');
       
       // Store the request and set it as active
       signingStorage.saveSignatureData(data.id, data);

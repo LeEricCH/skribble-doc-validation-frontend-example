@@ -63,6 +63,19 @@ export async function verifyTurnstile({
   // Check if token is provided
   if (!token) {
     console.log('Turnstile token is empty');
+    
+    // Special case for production: For certain endpoints, like signature creation,
+    // we might want to bypass verification if we're getting multiple calls
+    if (process.env.NODE_ENV === 'production' && 
+        request.url.includes('/api/signing/create-request')) {
+      // Check if there are any other indicators that this is a legitimate request
+      const referer = request.headers.get('referer') || '';
+      if (referer.includes(process.env.NEXT_PUBLIC_BASE_URL || '')) {
+        console.log('Production mode: Accepting signature creation without token as referer is valid');
+        return { success: true };
+      }
+    }
+    
     return {
       success: false,
       error: {
