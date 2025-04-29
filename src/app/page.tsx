@@ -127,25 +127,36 @@ export default function ValidatePage() {
     const loadSignedDocument = async () => {
       const shouldValidateSignedDocument = localStorage.getItem('validateSignedDocument') === 'true';
       
+      console.log('Checking for signed document to validate:', shouldValidateSignedDocument);
+      
       if (shouldValidateSignedDocument && selectedFiles.length === 0) {
+        console.log('Attempting to load signed document for validation');
         setIsLoadingDocument(true);
         
         try {
           const activeRequestId = signingStorage.getActiveRequest();
+          console.log('Active request ID:', activeRequestId);
           
           if (activeRequestId) {
             // First check if document is stored in signing storage
             let documentContent = signingStorage.getDocumentContent(activeRequestId);
+            console.log('Document content from storage:', documentContent ? `Found (${documentContent.length} bytes)` : 'Not found');
             
             // Get request data to find document ID (we need this regardless)
             const requestData = signingStorage.getSignatureData(activeRequestId);
+            console.log('Signature request data:', requestData ? 'Found' : 'Not found', requestData?.document_id ? `(document_id: ${requestData.document_id})` : '');
             
             // If coming from onboarding flow or content is missing, always fetch fresh document from API
             if (!documentContent || localStorage.getItem('validateSignedDocument') === 'true') {
 
-              if (requestData?.document_id) {
-                const docId = requestData.document_id;
+              // Check for document ID in different possible property names
+              const docId = requestData?.document_id || 
+                           (requestData?.documents?.[0]?.id) || 
+                           (Array.isArray(requestData?.documents_ids) ? requestData?.documents_ids[0] : undefined);
+              
+      
 
+              if (docId) {
                 // Fetch document content from API
                 const documentResponse = await fetch(`/api/signing/document/${docId}?format=json`);
                 
@@ -171,8 +182,12 @@ export default function ValidatePage() {
               if (documentContent.length < 1000) {
                 console.warn("Document content seems too small for a valid PDF, attempting to fetch from API");
                 
-                if (requestData?.document_id) {
-                  const docId = requestData.document_id;
+                // Check for document ID in different possible property names
+                const docId = requestData?.document_id || 
+                            (requestData?.documents?.[0]?.id) || 
+                            (Array.isArray(requestData?.documents_ids) ? requestData?.documents_ids[0] : undefined);
+                
+                if (docId) {
                   // Try to fetch document content from API as fallback
                   const documentResponse = await fetch(`/api/signing/document/${docId}?format=json`);
                   
@@ -224,8 +239,8 @@ export default function ValidatePage() {
                 // Add the file to the state
                 setSelectedFiles([file]);
                 
-                // Make sure the flag is still set for the validation process
-                localStorage.setItem('validateSignedDocument', 'true');
+                // Clear the flag so we don't keep trying to load on subsequent renders
+                localStorage.removeItem('validateSignedDocument');
               } catch (error) {
                 console.error("Error creating file object:", error);
                 setError("Error creating the signed document file. Please upload it manually.");

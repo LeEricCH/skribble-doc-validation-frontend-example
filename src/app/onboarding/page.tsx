@@ -324,8 +324,10 @@ function OnboardingContent() {
       // Set a cookie for the middleware to check
       document.cookie = "onboardingCompleted=true; path=/; max-age=31536000"; // 1 year expiration
       
-      // Redirect to the validator page (home)
-      router.push('/');
+      // Use direct navigation instead of Next.js router for more reliable navigation
+      // This ensures the page fully reloads and processes the localStorage flags
+      console.log('Redirecting to validator page with document ID:', activeRequestId);
+      window.location.href = '/';
     } else {
       // If no request ID is found, just complete the onboarding
       setActiveStep(4);
@@ -333,7 +335,7 @@ function OnboardingContent() {
       document.cookie = "onboardingCompleted=true; path=/; max-age=31536000";
       
       setTimeout(() => {
-        router.push('/');
+        window.location.href = '/';
       }, 3000);
     }
   };
