@@ -5,7 +5,6 @@ import type {
   ValidationTimeInfo,
   SignatureAttribute,
   CryptoInformation,
-  CertificateInfo,
   TrustChain,
   ValidationScore,
   ValidationScoreItem
@@ -183,7 +182,7 @@ export function parseEtsiReport(xmlString: string): TechnicalValidationData | nu
       cryptoInfo,
       processName: processElement?.textContent || 'Unknown',
       mainIndication: mainIndicationElement?.textContent || 'Unknown',
-      subIndication: subIndicationElement?.textContent
+      subIndication: subIndicationElement?.textContent ?? undefined
     };
     
     return technicalData;
