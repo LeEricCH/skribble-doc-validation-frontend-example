@@ -7,6 +7,7 @@ import { FileCheck, RefreshCw, History, ArrowLeft } from 'lucide-react'
 import MainContent from '@/components/layout/MainContent'
 import ValidationResults from '@/components/features/validator/ValidationResults'
 import BatchValidationResults from '@/components/features/validator/BatchValidationResults'
+import SuccessDialog from '@/components/features/dialogs/SuccessDialog'
 import type { ValidationResponse, SignerInfo, ValidationOptions } from '@/types/validation'
 import type { ValidationDisplayData } from '@/components/features/validator/ValidationResults'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -56,6 +57,22 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
   const router = useRouter()
   const searchParams = useSearchParams()
   
+  // Force the success dialog to show when we detect this is from onboarding
+  useEffect(() => {
+    // First check if we need to show the success dialog
+    const validateFlag = localStorage.getItem('validateSignedDocument');
+    const fromOnboardingParam = searchParams.get('fromOnboarding');
+    
+    if (validateFlag === 'true' || fromOnboardingParam === 'true') {
+      localStorage.setItem('showSuccessAfterValidation', 'true');
+      
+      // Only clean up validateSignedDocument after setting showSuccessAfterValidation
+      if (validateFlag === 'true') {
+        localStorage.removeItem('validateSignedDocument');
+      }
+    }
+  }, [searchParams]);
+  
   // Fetch validation data by ID when the component mounts
   useEffect(() => {
     async function fetchValidation() {
@@ -65,12 +82,25 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
       setError(null)
       
       try {
+        // Check all relevant flags for success dialog
+        const validateSignedFlag = localStorage.getItem('validateSignedDocument');
+        const fromOnboardingParam = searchParams.get('fromOnboarding');
+
+        
+        // Check if we're coming from onboarding flow and clean up the flags
+        if (fromOnboardingParam === 'true' || validateSignedFlag === 'true') {
+          // Make sure the success dialog flag is set
+          localStorage.setItem('showSuccessAfterValidation', 'true');
+          
+          // Clean up the validateSignedDocument flag that we kept until redirect
+          localStorage.removeItem('validateSignedDocument');
+          
+        }
+        
         // First check if we have the full validation data stored
         const storedData = validationStorage.getValidationData(validationId);
-        console.log('Found stored validation data:', storedData ? 'Yes' : 'No');
         
         if (storedData) {
-          console.log('Using stored validation data:', storedData);
           
           // Check if this validation is part of a batch
           const validateBatchId = storedData.batchId as string;
@@ -87,7 +117,6 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
           }
           
           if (checkForBatch) {
-            console.log('This validation is part of a batch:', validateBatchId);
             setIsBatchValidation(true);
             
             if (validateBatchId) {
@@ -106,11 +135,9 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
                   setBatchResultIndex(currentResultIndex);
                 }
                 
-                // Store the batch ID for potential future API calls or navigation
-                console.log(`Using batch ID ${validateBatchId} for validation ${validationId}`);
+
               } else {
                 // If we can't find the batch, we fall back to showing this as a single validation
-                console.log('Could not find batch data, showing as single validation');
                 setIsBatchValidation(false);
                 setBatchId(null);
               }
@@ -142,7 +169,12 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
           const signersArray = storedData.signers as SignerInfo[] || [];
           if (signersArray.length > 0) {
             console.log('Setting signer info from stored data:', signersArray.length);
+            console.log('Signers data:', JSON.stringify(signersArray));
             setSignerInfo(signersArray);
+          } else {
+            console.log('No signers found in stored data, fetching from API');
+            // Fetch signers information from the dedicated API endpoint
+            fetchSignersInfo(validationId);
           }
           
           // Convert stored data to our expected format
@@ -178,9 +210,15 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
         
         // Extract signers if available
         const signersArray = data.signers || [];
+        console.log('Signers found in API response:', signersArray.length || 0);
+        
         if (signersArray.length > 0) {
-          console.log('Found signers:', signersArray.length);
+          console.log('Found signers in API response:', signersArray.length);
           setSignerInfo(signersArray);
+        } else {
+          console.log('No signers found in API response, fetching separately');
+          // Fetch signers separately since they might be in a different endpoint
+          fetchSignersInfo(validationId);
         }
         
         // Override data.valid if appropriate - sometimes the API and history disagree
@@ -262,12 +300,48 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
     };
   };
 
+  const fetchSignersInfo = async (id: string) => {
+    try {
+      console.log('Fetching signers information from API for validation ID:', id);
+      const response = await fetch(`/api/signers/${id}`);
+      
+      if (!response.ok) {
+        console.error('Failed to fetch signers:', response.status);
+        return;
+      }
+      
+      const data = await response.json();
+      console.log('Successfully fetched signers from API:', data.length);
+      
+      if (Array.isArray(data) && data.length > 0) {
+        console.log('Setting signers from API response');
+        setSignerInfo(data);
+        
+        // Optionally, update the stored validation data with signers information
+        const storedData = validationStorage.getValidationData(id);
+        if (storedData) {
+          validationStorage.saveValidationData(id, {
+            ...storedData,
+            signers: data
+          });
+        }
+      } else {
+        console.log('No signers found in API response');
+      }
+    } catch (error) {
+      console.error('Error fetching signers:', error);
+    }
+  };
+
   return (
     <MainContent
       title={t('resultsTitle')}
       description={t('resultsDescription')}
       icon={<FileCheck />}
     >
+      {/* Success Dialog for completed onboarding flow */}
+      <SuccessDialog />
+      
       {error && (
         <Alert 
           severity="error" 

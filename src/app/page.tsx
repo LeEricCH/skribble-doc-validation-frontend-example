@@ -8,6 +8,7 @@ import DocumentUploader from '@/components/features/validator/DocumentUploader'
 import ValidationSettingsPanel from '@/components/features/validator/ValidationSettingsPanel'
 import type { ValidationResponse, ValidationOptions } from '@/types/validation'
 import validationHistory from '@/utils/validationHistory'
+import signingStorage from '@/utils/signingStorage'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import '@/styles/batch-validation.css'
@@ -58,7 +59,6 @@ const validationStorage = {
       
       // Save back to localStorage
       localStorage.setItem('validationData', JSON.stringify(existingData));
-      console.log(`Saved complete validation data for ID: ${id}`);
     } catch (err) {
       console.error('Error saving validation data to localStorage:', err);
     }
@@ -70,7 +70,6 @@ const validationStorage = {
     
     try {
       localStorage.setItem('batchValidationData', JSON.stringify(batchData));
-      console.log('Saved batch validation data to localStorage');
     } catch (err) {
       console.error('Error saving batch validation data to localStorage:', err);
     }
@@ -117,12 +116,138 @@ export default function ValidatePage() {
   const [validationComplete, setValidationComplete] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [isLoadingDocument, setIsLoadingDocument] = useState(false)
   const router = useRouter()
   
   // Get validation settings from localStorage if available
   const [validationSettings, setValidationSettings] = useState<ValidationOptions | null>(null);
-  
+
+  // Check for returning from the onboarding flow with a document to validate
   useEffect(() => {
+    const loadSignedDocument = async () => {
+      const shouldValidateSignedDocument = localStorage.getItem('validateSignedDocument') === 'true';
+      
+      if (shouldValidateSignedDocument && selectedFiles.length === 0) {
+        setIsLoadingDocument(true);
+        
+        try {
+          const activeRequestId = signingStorage.getActiveRequest();
+          
+          if (activeRequestId) {
+            // First check if document is stored in signing storage
+            let documentContent = signingStorage.getDocumentContent(activeRequestId);
+            
+            // Get request data to find document ID (we need this regardless)
+            const requestData = signingStorage.getSignatureData(activeRequestId);
+            
+            // If coming from onboarding flow or content is missing, always fetch fresh document from API
+            if (!documentContent || localStorage.getItem('validateSignedDocument') === 'true') {
+
+              if (requestData?.document_id) {
+                const docId = requestData.document_id;
+
+                // Fetch document content from API
+                const documentResponse = await fetch(`/api/signing/document/${docId}?format=json`);
+                
+                if (documentResponse.ok) {
+                  const documentData = await documentResponse.json();
+
+                  if (documentData.content) {
+                    documentContent = documentData.content;
+                    // Save document content for future use
+                    if (documentContent) {
+                      signingStorage.saveDocumentContent(activeRequestId, documentContent);
+                    }
+                  }
+                } else {
+                  console.error("Failed to fetch document from API:", documentResponse.status);
+                }
+              }
+            }
+            
+            // Convert document content to File object if found
+            if (documentContent) {
+              // Check if the content seems like a valid PDF (should be larger than 1KB at minimum)
+              if (documentContent.length < 1000) {
+                console.warn("Document content seems too small for a valid PDF, attempting to fetch from API");
+                
+                if (requestData?.document_id) {
+                  const docId = requestData.document_id;
+                  // Try to fetch document content from API as fallback
+                  const documentResponse = await fetch(`/api/signing/document/${docId}?format=json`);
+                  
+                  if (documentResponse.ok) {
+                    const documentData = await documentResponse.json();
+                    if (documentData.content && documentData.content.length > 1000) {
+                      documentContent = documentData.content;
+                      // Use type assertion to ensure TypeScript knows documentContent is a string
+                      signingStorage.saveDocumentContent(activeRequestId, documentContent as string);
+                    } else {
+                      console.error("API returned invalid or small document content");
+                      setError("Could not load a valid signed document from the API.");
+                      setIsLoadingDocument(false);
+                      return;
+                    }
+                  } else {
+                    console.error("Failed to fetch document as fallback:", documentResponse.status);
+                    setError("Could not load the signed document. Please upload it manually.");
+                    setIsLoadingDocument(false);
+                    return;
+                  }
+                } else {
+                  console.error("No document ID available for fallback fetch");
+                  setError("Could not find document ID. Please upload the document manually.");
+                  setIsLoadingDocument(false);
+                  return;
+                }
+              }
+              
+              try {
+                // Since we're inside the if(documentContent) block, we can safely cast to string
+                const content = documentContent as string;
+                const base64Data = content.includes('data:') 
+                  ? content.split(',')[1] 
+                  : content;
+                
+                // Create a blob directly from base64
+                const binary = atob(base64Data);
+                const array = [];
+                for (let i = 0; i < binary.length; i++) {
+                  array.push(binary.charCodeAt(i));
+                }
+                
+                // Create blob from binary data
+                const blob = new Blob([new Uint8Array(array)], {type: 'application/pdf'});
+                
+                // Create a File object
+                const file = new File([blob], `signed-document-${activeRequestId}.pdf`, {type: 'application/pdf'});
+                // Add the file to the state
+                setSelectedFiles([file]);
+                
+                // Make sure the flag is still set for the validation process
+                localStorage.setItem('validateSignedDocument', 'true');
+              } catch (error) {
+                console.error("Error creating file object:", error);
+                setError("Error creating the signed document file. Please upload it manually.");
+              }
+            } else {
+              console.error("No document content found");
+              setError("Could not load the signed document. Please upload it manually.");
+            }
+          }
+        } catch (error) {
+          console.error("Error loading signed document:", error);
+          setError("Error loading the signed document. Please upload it manually.");
+        } finally {
+          setIsLoadingDocument(false);
+        }
+      }
+    };
+    
+    loadSignedDocument();
+  }, [selectedFiles.length]);
+
+  useEffect(() => {    
     // Retrieve settings from localStorage when component mounts
     if (typeof window !== 'undefined') {
       const savedSettings = localStorage.getItem('validationSettings');
@@ -224,13 +349,28 @@ export default function ValidatePage() {
     // Save full validation data to localStorage
     validationStorage.saveValidationData(validationResponse.id, augmentedData);
     
-    // After saving, redirect to validation results page
-    router.push(`/validation/${validationResponse.id}`);
+    // Check if we need to show success dialog (coming from onboarding flow)
+    const validateSignedFlag = localStorage.getItem('validateSignedDocument');
+    
+    if (validateSignedFlag === 'true') {
+      localStorage.setItem('showSuccessAfterValidation', 'true');
+      
+      // DEBUG: Explicitly set flag values to make sure they're correct
+      localStorage.setItem('validateSignedDocument', 'true');
+      localStorage.setItem('showSuccessAfterValidation', 'true');
+      
+      router.push(`/validation/${validationResponse.id}?fromOnboarding=true`);
+    } else {
+      // After saving, redirect to validation results page without parameter
+      router.push(`/validation/${validationResponse.id}`);
+    }
   };
   
   // Handle batch validation response
   const handleBatchValidation = (batchData: BatchValidationResult) => {
-    console.log("Processing batch validation results:", batchData.results.length);
+    
+    // Check if this is coming from onboarding
+    const validateSignedFlag = localStorage.getItem('validateSignedDocument');
     
     // Generate a unique batch ID if not already present
     const batchId = batchData.batch.id || `batch-${Date.now()}`;
@@ -278,6 +418,19 @@ export default function ValidatePage() {
       }
     }
     
+    // Handle success dialog if coming from onboarding
+    if (validateSignedFlag === 'true') {
+      localStorage.setItem('showSuccessAfterValidation', 'true');
+      
+      // For batch validation with results, redirect to the first validation result
+      if (batchData.results.length > 0 && batchData.results[0].id) {
+        const url = `/validation/${batchData.results[0].id}?fromOnboarding=true`;
+        router.push(url);
+        return;
+      }
+    }
+    
+    // Normal flow (not from onboarding)
     // For batch validation with results, redirect to the first validation result
     if (batchData.results.length > 0 && batchData.results[0].id) {
       // Only add batch=true parameter if there are multiple results
@@ -325,7 +478,7 @@ export default function ValidatePage() {
         </Alert>
       )}
       
-      {isValidating && (
+      {(isValidating || isLoadingDocument) && (
         <Box sx={{ mb: 4 }}>
           <Paper 
             elevation={0} 
@@ -349,18 +502,24 @@ export default function ValidatePage() {
               </div>
               <div className="validating-content">
                 <h3 className="validating-title">
-                  {selectedFiles.length > 1 
-                    ? t('validatingBatch', { count: selectedFiles.length }) 
-                    : t('validatingDocument')}
+                  {isLoadingDocument 
+                    ? 'Loading Signed Document'
+                    : selectedFiles.length > 1 
+                      ? t('validatingBatch', { count: selectedFiles.length }) 
+                      : t('validatingDocument')}
                 </h3>
                 <div className="progress-bar">
                   <div className="progress-bar-inner" />
                 </div>
                 <p className="validating-description">
-                  {t('validatingDescription')}
+                  {isLoadingDocument 
+                    ? 'Preparing your signed document for validation...'
+                    : t('validatingDescription') || 'Validating your document...'}
                 </p>
                 <p className="validating-files-info">
-                  {t('processingFiles')}
+                  {isLoadingDocument 
+                    ? 'This will only take a moment'
+                    : t('processingFiles') || 'Processing your files'}
                 </p>
               </div>
             </div>

@@ -29,7 +29,7 @@ export default function ClientLayout({ children, locale, messages }: ClientLayou
               {children}
             </div>
           </main>
-
+          
           <style jsx global>{`
             body {
               margin: 0;

@@ -1,27 +1,18 @@
-import type { ValidationOptions, ValidationResponse, LoginRequest, LoginResponse, ApiErrorResponse, SignerInfo } from '../types/validation';
-
-// Define a type that works across both Node.js and browser environments
-export interface FileWithMetadata {
-  name: string;
-  size: number;
-  type: string;
-  arrayBuffer(): Promise<ArrayBuffer>;
-  text?(): Promise<string>;
-}
+import type { ApiErrorResponse } from '../types/validation';
 
 /**
- * API Client for interacting with the Skribble Document Validation API.
+ * API Client for interacting with the Skribble E-Signing API.
  */
-export class ValidationApiClient {
+export class SigningApiClient {
   private baseUrl: string;
   private username: string;
   private apikey: string;
   private accessToken: string | null = null;
   private tokenExpiry: number | null = null;
 
-  constructor(username: string, apikey: string, baseUrl = 'https://document-validation.skribble.cloud/v1') {
+  constructor(username: string, apikey: string, baseUrl = 'https://api.skribble.com/v2') {
     if (!username || !apikey) {
-      throw new Error('Username and API key are required for ValidationApiClient.');
+      throw new Error('Username and API key are required for SigningApiClient.');
     }
     this.username = username;
     this.apikey = apikey;
@@ -92,7 +83,7 @@ export class ValidationApiClient {
 
           // Check if JSON is expected in the response
           const contentType = response.headers.get('content-type') || '';
-          if (!contentType.includes('application/json')) {
+          if (!contentType.includes('application/json') && options.headers && 'Accept' in options.headers && options.headers.Accept === 'application/json') {
             console.warn(`Expected JSON response but got ${contentType}. URL: ${url}`);
             const text = await response.text();
             if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
@@ -111,6 +102,17 @@ export class ValidationApiClient {
                 message: `Invalid response format: ${error}`,
                 error: { detail: `Expected JSON but received: ${text.substring(0, 100)}...` }
               } as ApiErrorResponse;
+            }
+          }
+
+          // For non-JSON responses like raw bytes (PDF download)
+          if (!contentType.includes('application/json') && 
+              !(options.headers && 'Accept' in options.headers && options.headers.Accept === 'application/json')) {
+            if (response.status === 200) {
+              if (contentType.includes('application/pdf')) {
+                return await response.blob() as unknown as T;
+              }
+              return await response.text() as unknown as T;
             }
           }
 
@@ -145,7 +147,7 @@ export class ValidationApiClient {
         throw {
           status: 408, // Request Timeout
           message: 'Request timed out',
-          error: { detail: 'The request to the validation API timed out after 30 seconds' }
+          error: { detail: 'The request to the signing API timed out after 30 seconds' }
         } as ApiErrorResponse;
       }
       
@@ -180,13 +182,13 @@ export class ValidationApiClient {
       return this.accessToken;
     }
 
-    const loginData: LoginRequest = {
+    const loginData = {
       username: this.username,
-      apikey: this.apikey,
+      'api-key': this.apikey,
     };
 
     try {
-      const response = await this.fetchApi<LoginResponse>('/access/login', {
+      const response = await this.fetchApi<string>('/access/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,11 +196,11 @@ export class ValidationApiClient {
         body: JSON.stringify(loginData),
       });
 
-      if (!response.accesstoken) {
+      if (!response) {
         throw new Error('Login response did not contain an access token.');
       }
       
-      this.accessToken = response.accesstoken;
+      this.accessToken = response;
       // Decode token to get expiry time (assuming JWT format)
       try {
         // Ensure accessToken is not null before splitting
@@ -225,51 +227,53 @@ export class ValidationApiClient {
   }
 
   /**
-   * Validates a document by uploading it to the API.
+   * Creates a signature request for a document.
    */
-  public async validateDocument(file: FileWithMetadata, options?: ValidationOptions): Promise<ValidationResponse> {
+  public async createSignatureRequest(
+    pdfBase64: string, 
+    email: string, 
+    mobileNumber: string, 
+    language: string
+  ): Promise<SignatureRequestResponse> {
     const token = await this.login(); // Ensure we have a valid token
 
-    const formData = new FormData();
-    formData.append('content', file as unknown as Blob, file.name);
-
-    // Build query parameters
-    const queryParams = new URLSearchParams();
-    if (options) {
-      for (const [key, value] of Object.entries(options)) {
-        if (value !== undefined) {
-          if (Array.isArray(value)) {
-            for (const item of value) {
-              queryParams.append(key, item);
-            }
-          } else {
-            queryParams.append(key, String(value));
-          }
+    const requestData = {
+      title: "Document Validation Demo Signature Request",
+      signatures: [
+        {
+          account_email: email,
+          signer_identity_data: {
+            email_address: email,
+            mobile_number: mobileNumber || '',
+            language: language
+          },
+          notify: false
         }
-      }
-    }
+      ],
+      content: pdfBase64,
+      quality: "AES",
+      legislation: "ZERTES"
+    };
 
-    const queryString = queryParams.toString();
-    const endpoint = `/validate/document${queryString ? `?${queryString}` : ''}`;
-    
-    console.log(`Validating document: ${file.name}`);
-    return this.fetchApi<ValidationResponse>(endpoint, {
+    console.log(`Creating signature request for: ${email}`);
+    return this.fetchApi<SignatureRequestResponse>('/signature-requests', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
-      body: formData,
+      body: JSON.stringify(requestData),
     });
   }
 
   /**
-   * Gets information about signers for a validated document.
+   * Gets information about a signature request.
    */
-  public async getSignerInfo(validationId: string): Promise<SignerInfo[]> {
+  public async getSignatureRequest(requestId: string): Promise<SignatureRequestResponse> {
     const token = await this.login(); // Ensure we have a valid token
     
-    console.log(`Fetching signer information for validation ID: ${validationId}`);
-    return this.fetchApi<SignerInfo[]>(`/infos/${validationId}/signers`, {
+    console.log(`Fetching signature request: ${requestId}`);
+    return this.fetchApi<SignatureRequestResponse>(`/signature-requests/${requestId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -279,71 +283,62 @@ export class ValidationApiClient {
   }
 
   /**
-   * Gets validation data for a validated document by ID.
+   * Downloads the signed document content.
    */
-  public async getValidationData(validationId: string): Promise<ValidationResponse> {
+  public async getDocumentContent(documentId: string, responseType: 'json' | 'blob' = 'json'): Promise<DocumentContentResponse | Blob> {
     const token = await this.login(); // Ensure we have a valid token
     
-    console.log(`Fetching validation data for ID: ${validationId}`);
-    return this.fetchApi<ValidationResponse>(`/infos/${validationId}/validation`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-  }
-
-  /**
-   * Gets the ETSI TS 119 102-2 signature validation report as XML
-   * This provides detailed technical validation information in a standardized format
-   */
-  public async getEtsiValidationReport(validationId: string): Promise<string> {
-    const token = await this.login(); // Ensure we have a valid token
+    console.log(`Downloading document content: ${documentId}`);
     
-    console.log(`Fetching ETSI validation report for ID: ${validationId}`);
-    
-    // Custom handling since the response is XML, not JSON
-    const url = `${this.baseUrl}/reports/${validationId}/etsi`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
-    
-    try {
-      const response = await fetch(url, {
+    if (responseType === 'json') {
+      return this.fetchApi<DocumentContentResponse>(`/documents/${documentId}/content`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'application/xml',
+          'Accept': 'application/json',
         },
-        signal: controller.signal,
       });
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        let errorDetail: Record<string, unknown> | string | undefined;
-        try {
-          // Try to read as text since it might be error message
-          const text = await response.text();
-          errorDetail = text;
-        } catch (textError) {
-          errorDetail = `Failed to read error response: ${textError instanceof Error ? textError.message : String(textError)}`;
-        }
-        
-        const apiError: ApiErrorResponse = {
-          status: response.status,
-          message: response.statusText,
-          error: typeof errorDetail === 'string' ? { detail: errorDetail } : errorDetail,
-        };
-        console.error('API Error fetching ETSI report:', JSON.stringify(apiError, null, 2));
-        throw apiError;
-      }
-      
-      return await response.text();
-    } catch (error) {
-      clearTimeout(timeoutId);
-      console.error('Error fetching ETSI report:', error);
-      throw error;
     }
+    
+    return this.fetchApi<Blob>(`/documents/${documentId}/content`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
   }
+}
+
+// Types for Skribble E-Signing API responses
+export interface SignatureRequestResponse {
+  id: string;
+  title: string;
+  status: 'OPEN' | 'SIGNED' | 'REJECTED' | 'WITHDRAWN';
+  created_at: string;
+  updated_at: string;
+  signatures: SignatureInfo[];
+  documents?: DocumentInfo[];
+}
+
+export interface SignatureInfo {
+  id: string;
+  status: 'OPEN' | 'SIGNED' | 'REJECTED' | 'WITHDRAWN';
+  signing_url: string;
+  signer_identity_data: {
+    email_address: string;
+    mobile_number: string;
+    language: string;
+  };
+}
+
+export interface DocumentInfo {
+  id: string;
+  status: string;
+  title?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocumentContentResponse {
+  content: string; // Base64 encoded PDF
 } 
