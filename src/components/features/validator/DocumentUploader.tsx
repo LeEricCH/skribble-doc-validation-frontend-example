@@ -16,14 +16,12 @@ interface DocumentUploaderProps {
 function LoadingSkeleton() {
   return (
     <div className="validator-container">
-      <div className="card-container skeleton-card">
-        <div className="skeleton-content">
-          <div className="skeleton-circle" />
-          <div className="skeleton-line skeleton-title" />
-          <div className="skeleton-line skeleton-description" />
-          <div className="skeleton-line skeleton-description-short" />
-          <div className="skeleton-badge" />
-        </div>
+      <div className="skeleton-content">
+        <div className="skeleton-circle" />
+        <div className="skeleton-line skeleton-title" />
+        <div className="skeleton-line skeleton-description" />
+        <div className="skeleton-line skeleton-description-short" />
+        <div className="skeleton-badge" />
       </div>
     </div>
   )
@@ -109,82 +107,80 @@ export default function DocumentUploader({ onFilesSelect, selectedFiles, isValid
         </p>
       </div> */}
     
-      <div className="card-container">
-        {selectedFiles.length > 0 ? (
-          <div className="files-selected-state">
-            <div className="files-header">
-              <h3 className="batch-title">
-                {selectedFiles.length > 1 
-                  ? t('selectedFilesBatch', { count: selectedFiles.length }) 
-                  : t('selectedFile')}
-              </h3>
-              <button 
-                type="button" 
-                className="clear-all-button"
-                onClick={handleClearAllFiles}
-              >
-                {t('clearAll')}
-              </button>
-            </div>
-            
-            <div className="files-list">
-              {selectedFiles.map((file, index) => (
-                <div key={`${file.name}-${index}`} className="file-item">
-                  <div className="file-icon-container">
-                    <File size={24} className="file-icon" />
-                    <div className="file-type-badge">{file.name.split('.').pop()?.toUpperCase()}</div>
-                  </div>
-                  <div className="file-info-container">
-                    <h4 className="file-name" title={file.name}>{getDisplayName(file.name)}</h4>
-                    <p className="file-size">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                  </div>
-                  <button 
-                    type="button" 
-                    className="remove-file-button"
-                    onClick={() => handleRemoveFile(index)}
-                    disabled={isValidating}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            
-            {/* Add more files button */}
-            <div className="add-more-container" {...getRootProps()}>
-              <input {...getInputProps()} />
-              <button type="button" className="add-more-button">
-                <UploadIcon size={16} />
-                {t('addMoreFiles')}
-              </button>
-            </div>
+      {selectedFiles.length > 0 ? (
+        <div className="files-selected-state">
+          <div className="files-header">
+            <h3 className="batch-title">
+              {selectedFiles.length > 1 
+                ? t('selectedFilesBatch', { count: selectedFiles.length }) 
+                : t('selectedFile')}
+            </h3>
+            <button 
+              type="button" 
+              className="clear-all-button"
+              onClick={handleClearAllFiles}
+            >
+              {t('clearAll')}
+            </button>
           </div>
-        ) : (
-          <div
-            {...getRootProps()}
-            className={`uploader-dropzone ${isDragActive ? 'active' : ''} ${fileError ? 'error' : ''}`}
-          >
+          
+          <div className="files-list">
+            {selectedFiles.map((file, index) => (
+              <div key={`${file.name}-${index}`} className="file-item">
+                <div className="file-icon-container">
+                  <File size={24} className="file-icon" />
+                  <div className="file-type-badge">{file.name.split('.').pop()?.toUpperCase()}</div>
+                </div>
+                <div className="file-info-container">
+                  <h4 className="file-name" title={file.name}>{getDisplayName(file.name)}</h4>
+                  <p className="file-size">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+                <button 
+                  type="button" 
+                  className="remove-file-button"
+                  onClick={() => handleRemoveFile(index)}
+                  disabled={isValidating}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          {/* Add more files button */}
+          <div className="add-more-container" {...getRootProps()}>
             <input {...getInputProps()} />
-            <div className="upload-content">
-              <div className="upload-icon-container">
-                <Upload size={48} className="upload-icon" />
+            <button type="button" className="add-more-button">
+              <UploadIcon size={16} />
+              {t('addMoreFiles')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div
+          {...getRootProps()}
+          className={`uploader-dropzone ${isDragActive ? 'active' : ''} ${fileError ? 'error' : ''}`}
+        >
+          <input {...getInputProps()} />
+          <div className="upload-content">
+            <div className="upload-icon-container">
+              <Upload size={48} className="upload-icon" />
+            </div>
+            <h3 className="uploader-title">{t('dragDropMultiple')}</h3>
+            <p className="uploader-description">
+              {t('or')} <button type="button" className="browse-button">{t('browse')}</button> {t('toUploadMultiple')}
+            </p>
+            {fileError && (
+              <div className="file-error">
+                {fileError}
               </div>
-              <h3 className="uploader-title">{t('dragDropMultiple')}</h3>
-              <p className="uploader-description">
-                {t('or')} <button type="button" className="browse-button">{t('browse')}</button> {t('toUploadMultiple')}
-              </p>
-              {fileError && (
-                <div className="file-error">
-                  {fileError}
-                </div>
-              )}
-              <div className="supported-formats">
-                <div className="format-badge">{t('supportedFormats')}</div>
-              </div>
+            )}
+            <div className="supported-formats">
+              <div className="format-badge">{t('supportedFormats')}</div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 } 

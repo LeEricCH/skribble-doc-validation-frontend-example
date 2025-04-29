@@ -342,21 +342,13 @@ export default function ValidatePage() {
       
       {!validationComplete && !isValidating && (
         <Box sx={{ mb: 4 }}>
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              mb: 3, 
-              borderRadius: 2,
-              bgcolor: 'background.paper',
-              overflow: 'hidden'
-            }}
-          >
+          <Box sx={{ mt: 2, mb: 5 }}>
             <DocumentUploader 
               onFilesSelect={setSelectedFiles}
               selectedFiles={selectedFiles}
               isValidating={isValidating}
             />
-          </Paper>
+          </Box>
           
           <ValidationSettingsPanel 
             settings={validationSettings}

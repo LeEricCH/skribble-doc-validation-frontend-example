@@ -8,7 +8,7 @@ import {
   // Settings,
   ChevronRight,
   History,
-  Upload,
+  FileCheck,
   Menu,
   X,
   Globe,
@@ -132,7 +132,7 @@ export default function Sidebar() {
 
   const navItems = [
     { 
-      icon: Upload, 
+      icon: FileCheck, 
       label: t('validate'), 
       href: "/",
       onClick: () => {

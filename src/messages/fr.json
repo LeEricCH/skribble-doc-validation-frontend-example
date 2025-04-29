@@ -57,6 +57,9 @@
     "validationRequirements": "Exigences de validation",
     "validationSettings": "Informations supplémentaires",
     "rejectionSettings": "Paramètres de rejet",
+    "resetSettings": "Réinitialiser les paramètres",
+    "saveSettings": "Enregistrer les paramètres",
+    "resetDefaults": "Rétablir les valeurs par défaut",
     "quality": {
       "label": "Qualité de signature",
       "helper": "Définir la qualité minimale de signature requise pour la validation",
@@ -112,9 +115,7 @@
     "rejectUndefinedChanges": {
       "label": "Rejeter les changements non définis",
       "description": "Échouer la validation si des changements non définis sont détectés"
-    },
-    "resetSettings": "Réinitialiser les paramètres",
-    "saveSettings": "Enregistrer les paramètres"
+    }
   },
   "DocumentUploader": {
     "info": "Téléchargez des documents signés pour vérifier leurs signatures numériques et leur authenticité.",

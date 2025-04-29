@@ -254,6 +254,9 @@
     "validationRequirements": "Validierungsanforderungen",
     "validationSettings": "Zusätzliche Informationen",
     "rejectionSettings": "Ablehnungseinstellungen",
+    "resetSettings": "Einstellungen zurücksetzen",
+    "saveSettings": "Einstellungen speichern",
+    "resetDefaults": "Auf Standard zurücksetzen",
     "quality": {
       "label": "Signaturqualität",
       "helper": "Legen Sie die minimale erforderliche Signaturqualität fest",
@@ -309,9 +312,7 @@
     "rejectUndefinedChanges": {
       "label": "Undefinierte Änderungen ablehnen",
       "description": "Validierung fehlschlagen, wenn undefinierte Änderungen erkannt werden"
-    },
-    "resetSettings": "Einstellungen zurücksetzen",
-    "saveSettings": "Einstellungen speichern"
+    }
   },
   "Tooltips": {
     "documentInfo": "Grundlegende Informationen über das validierte Dokument, einschliesslich Dateidetails und Validierungsstatus.",

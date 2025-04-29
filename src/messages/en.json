@@ -58,6 +58,7 @@
     "rejectionSettings": "Rejection Settings",
     "resetSettings": "Reset Settings",
     "saveSettings": "Save Settings",
+    "resetDefaults": "Reset to Defaults",
     "quality": {
       "label": "Signature Quality",
       "helper": "Set the minimum signature quality required for validation",
