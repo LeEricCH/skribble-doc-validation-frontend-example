@@ -388,29 +388,6 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
               {t('legislation.helper')}
             </Typography>
           </Box>
-          
-          {/* Long Term Validation */}
-          <Box>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={localSettings.longTermValidation || false}
-                  onChange={handleLongTermValidationChange}
-                  color="primary"
-                />
-              }
-              label={
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {t('longTermValidation.label')}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {t('longTermValidation.description')}
-                  </Typography>
-                </Box>
-              }
-            />
-          </Box>
         </AccordionDetails>
       </Accordion>
       
@@ -453,6 +430,28 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
         </AccordionSummary>
         <AccordionDetails sx={{ p: 2.5 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {/* Long Term Validation */}
+            <Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={localSettings.longTermValidation || false}
+                    onChange={handleLongTermValidationChange}
+                    color="warning"
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {t('longTermValidation.label')}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {t('longTermValidation.description')}
+                    </Typography>
+                  </Box>
+                }
+              />
+            </Box>
             {/* Reject Visual Differences */}
             <Box>
               <FormControlLabel

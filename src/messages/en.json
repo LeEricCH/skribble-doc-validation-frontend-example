@@ -86,7 +86,7 @@
         "WORLD": "Global standards for electronic signatures",
         "CH": "Swiss legal framework for electronic signatures (ZertES)",
         "EU": "European Union eIDAS regulation for electronic signatures",
-        "CH_EU": "Compliance with both Swiss and EU regulations"
+        "CH_EU": "Compliance with either Swiss or EU regulations"
       }
     },
     "longTermValidation": {

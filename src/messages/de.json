@@ -289,7 +289,7 @@
         "WORLD": "Globale Standards für elektronische Signaturen",
         "CH": "Schweizerischer Rechtsrahmen für elektronische Signaturen (ZertES)",
         "EU": "Europäische eIDAS-Verordnung für elektronische Signaturen",
-        "CH_EU": "Konformität mit sowohl schweizerischen als auch EU-Vorschriften"
+        "CH_EU": "Konformität mit entweder schweizerischen oder EU-Vorschriften"
       }
     },
     "longTermValidation": {

@@ -87,7 +87,7 @@
         "WORLD": "Normes mondiales pour les signatures électroniques",
         "CH": "Cadre juridique suisse pour les signatures électroniques (LSCE)",
         "EU": "Règlement eIDAS européen pour les signatures électroniques",
-        "CH_EU": "Conformité avec les réglementations suisses et européennes"
+        "CH_EU": "Conformité avec les réglementations suisses ou européennes"
       }
     },
     "longTermValidation": {
@@ -159,7 +159,7 @@
     "visualDifferencesLabel": "Différences visuelles",
     "undefinedChangesLabel": "Changements non définis",
     "detectedChanges": "Détecté",
-    "noDetectedChanges": "Aucun détecté",
+    "noDetectedChanges": "Aucune détectée",
     "yes": "Oui",
     "no": "Non",
     "viewDetails": "Voir les détails",

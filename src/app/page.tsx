@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button, Alert, AlertTitle, Box, Paper } from '@mui/material'
-import { FileCheck, RefreshCw, History, Loader2, FileText } from 'lucide-react'
+import { FileCheck, RefreshCw, History, Loader2 } from 'lucide-react'
 import MainContent from '@/components/layout/MainContent'
 import DocumentUploader from '@/components/features/validator/DocumentUploader'
 import ValidationResults from '@/components/features/validator/ValidationResults'
@@ -314,9 +314,6 @@ export default function ValidatePage() {
               <div className="validating-animation">
                 <div className="spinner-container">
                   <Loader2 size={90} className="spinner" />
-                </div>
-                <div className="document-animation">
-                  <FileText size={48} className="document-icon" />
                 </div>
               </div>
               <div className="validating-content">

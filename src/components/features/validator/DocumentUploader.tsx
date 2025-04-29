@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect } from 'react'
 import { useDropzone, type FileRejection } from 'react-dropzone'
-import { Upload, File, X, UploadIcon } from 'lucide-react'
+import { Upload, File, X, UploadIcon, Loader } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import "@/styles/uploader.css";
 
@@ -16,12 +16,14 @@ interface DocumentUploaderProps {
 function LoadingSkeleton() {
   return (
     <div className="validator-container">
-      <div className="skeleton-content">
-        <div className="skeleton-circle" />
-        <div className="skeleton-line skeleton-title" />
-        <div className="skeleton-line skeleton-description" />
-        <div className="skeleton-line skeleton-description-short" />
-        <div className="skeleton-badge" />
+      <div className="uploader-dropzone skeleton-state">
+        <div className="skeleton-content">
+          <div className="skeleton-circle" />
+          <div className="skeleton-line skeleton-title" />
+          <div className="skeleton-line skeleton-description" />
+          <div className="skeleton-line skeleton-description-short" />
+          <div className="skeleton-badge" />
+        </div>
       </div>
     </div>
   )
@@ -96,6 +98,21 @@ export default function DocumentUploader({ onFilesSelect, selectedFiles, isValid
     return <LoadingSkeleton />;
   }
 
+  // CLEAN VALIDATION STATE - ONLY SPINNER, NO DOCUMENT ICONS
+  if (isValidating) {
+    return (
+      <div className="validator-container">
+        <div className="uploader-dropzone pure-spinner-container">
+          {/* ONLY A SPINNER AND TEXT - NO DOCUMENT ICON */}
+          <div className="pure-spinner-content">
+            <Loader size={48} className="spinner-only" />
+            <p className="spinner-text">{t('validating')}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="validator-container">
       {/* <div className="validator-info">
@@ -108,52 +125,54 @@ export default function DocumentUploader({ onFilesSelect, selectedFiles, isValid
       </div> */}
     
       {selectedFiles.length > 0 ? (
-        <div className="files-selected-state">
-          <div className="files-header">
-            <h3 className="batch-title">
-              {selectedFiles.length > 1 
-                ? t('selectedFilesBatch', { count: selectedFiles.length }) 
-                : t('selectedFile')}
-            </h3>
-            <button 
-              type="button" 
-              className="clear-all-button"
-              onClick={handleClearAllFiles}
-            >
-              {t('clearAll')}
-            </button>
-          </div>
-          
-          <div className="files-list">
-            {selectedFiles.map((file, index) => (
-              <div key={`${file.name}-${index}`} className="file-item">
-                <div className="file-icon-container">
-                  <File size={24} className="file-icon" />
-                  <div className="file-type-badge">{file.name.split('.').pop()?.toUpperCase()}</div>
+        <div className="uploader-dropzone files-container">
+          <div className="files-selected-state">
+            <div className="files-header">
+              <h3 className="batch-title">
+                {selectedFiles.length > 1 
+                  ? t('selectedFilesBatch', { count: selectedFiles.length }) 
+                  : t('selectedFile')}
+              </h3>
+              <button 
+                type="button" 
+                className="clear-all-button"
+                onClick={handleClearAllFiles}
+              >
+                {t('clearAll')}
+              </button>
+            </div>
+            
+            <div className="files-list">
+              {selectedFiles.map((file, index) => (
+                <div key={`${file.name}-${index}`} className="file-item">
+                  <div className="file-icon-container">
+                    <File size={24} className="file-icon" />
+                    <div className="file-type-badge">{file.name.split('.').pop()?.toUpperCase()}</div>
+                  </div>
+                  <div className="file-info-container">
+                    <h4 className="file-name" title={file.name}>{getDisplayName(file.name)}</h4>
+                    <p className="file-size">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="remove-file-button"
+                    onClick={() => handleRemoveFile(index)}
+                    disabled={isValidating}
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
-                <div className="file-info-container">
-                  <h4 className="file-name" title={file.name}>{getDisplayName(file.name)}</h4>
-                  <p className="file-size">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                </div>
-                <button 
-                  type="button" 
-                  className="remove-file-button"
-                  onClick={() => handleRemoveFile(index)}
-                  disabled={isValidating}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-          
-          {/* Add more files button */}
-          <div className="add-more-container" {...getRootProps()}>
-            <input {...getInputProps()} />
-            <button type="button" className="add-more-button">
-              <UploadIcon size={16} />
-              {t('addMoreFiles')}
-            </button>
+              ))}
+            </div>
+            
+            {/* Add more files button */}
+            <div className="add-more-container" {...getRootProps()}>
+              <input {...getInputProps()} />
+              <button type="button" className="add-more-button">
+                <UploadIcon size={16} />
+                {t('addMoreFiles')}
+              </button>
+            </div>
           </div>
         </div>
       ) : (
