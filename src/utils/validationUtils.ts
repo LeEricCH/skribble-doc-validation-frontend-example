@@ -18,6 +18,22 @@ export function isHigherOrEqualQuality(actual: string, required: string): boolea
 }
 
 /**
+ * Determines if a legislation meets the required legislation framework
+ * @param actual The actual legislation (CH, EU)
+ * @param required The required legislation framework (CH, EU, CH_EU)
+ * @returns boolean indicating if the actual legislation meets the required framework
+ */
+export function isLegislationCompliant(actual: string, required: string): boolean {
+  // If the required is CH_EU, then either CH or EU is valid
+  if (required === 'CH_EU') {
+    return actual === 'CH' || actual === 'EU';
+  }
+  
+  // Otherwise, direct equality check
+  return actual === required;
+}
+
+/**
  * Checks if a document fails validation due to settings requirements
  * @param isValid Whether the document is valid according to cryptographic checks
  * @param validSignatures Number of valid signatures
@@ -56,7 +72,7 @@ export function isFailedDueToSettings(
   // Check if any settings requirements are not met
   return (
     (quality && settings.quality && !isHigherOrEqualQuality(quality, settings.quality)) || 
-    (legislation && settings.legislation && legislation !== settings.legislation) || 
+    (legislation && settings.legislation && !isLegislationCompliant(legislation, settings.legislation)) || 
     (!!settings.longTermValidation && longTermValidation === false) || 
     (!!settings.rejectVisualDifferences && visualDifferences === true) || 
     (!!settings.rejectUndefinedChanges && undefinedChanges === true)
@@ -98,7 +114,7 @@ export function getFailureReasons(
     reasons.push(`${t.qualityRequirement || 'Required Quality'}: ${settings.quality}, ${t.actual || 'Actual'}: ${quality}`);
   }
   
-  if (legislation && settings.legislation && legislation !== settings.legislation) {
+  if (legislation && settings.legislation && !isLegislationCompliant(legislation, settings.legislation)) {
     reasons.push(`${t.legislationRequirement || 'Required Legislation'}: ${settings.legislation}, ${t.actual || 'Actual'}: ${legislation}`);
   }
   
@@ -159,7 +175,7 @@ export function getValidationStatus(
       !isHigherOrEqualQuality(result.quality, settings.quality);
     
     const failedDueToLegislation = result.legislation && settings.legislation && 
-      result.legislation !== settings.legislation;
+      !isLegislationCompliant(result.legislation, settings.legislation);
     
     const failedDueToLongTermValidation = settings.longTermValidation && 
       !result.longTermValidation;

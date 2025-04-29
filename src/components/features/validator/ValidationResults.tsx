@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { CheckCircle, AlertTriangle, FileCheck, Download, Info, HelpCircle } from 'lucide-react'
 import type { SignatureQuality, Legislation, SignerInfo } from '@/types/validation';
 import CertificateView from './CertificateView'
@@ -9,6 +9,7 @@ import TechnicalDetails from './TechnicalDetails'
 import { useTranslations } from 'next-intl'
 import "@/styles/results.css"
 import "@/styles/tooltip.css"
+import { isHigherOrEqualQuality, isLegislationCompliant } from '@/utils/validationUtils'
 
 // Helper component for tooltips
 interface TooltipProps {
@@ -89,31 +90,70 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [showCertificate, setShowCertificate] = useState<boolean>(false);
   const [certificateData, setCertificateData] = useState<CertificateData | null>(null);
+  const [processedValidation, setProcessedValidation] = useState<ValidationDisplayData | null>(null);
   
-  // Add console log for debugging
-  console.log("ValidationResults - signerInfo:", signerInfo);
-  console.log("ValidationResults - isLoadingSigners:", isLoadingSigners);
-  console.log("ValidationResults - validation:", validation);
+  // Process validation data to correct any issues
+  useEffect(() => {
+    if (!validation) {
+      setProcessedValidation(null);
+      return;
+    }
+    
+    // Create a copy we can modify
+    const updatedValidation = { ...validation };
+    
+    // Check if the document should be valid based on legislation
+    if (!updatedValidation.valid && 
+        updatedValidation.legislation && 
+        updatedValidation.settingsLegislation && 
+        updatedValidation.settingsLegislation === 'CH_EU' &&
+        (updatedValidation.legislation === 'CH' || updatedValidation.legislation === 'EU') &&
+        updatedValidation.validSignatures === updatedValidation.totalSignatures &&
+        updatedValidation.totalSignatures > 0) {
+      
+      // Check if no other validation criteria failed
+      const onlyFailedDueToLegislation = 
+        !(updatedValidation.settingsQuality && 
+          updatedValidation.quality && 
+          !isHigherOrEqualQuality(updatedValidation.quality, updatedValidation.settingsQuality)) &&
+        !(updatedValidation.settingsLongTermValidation && !updatedValidation.longTermValidation) &&
+        !(updatedValidation.settingsRejectVisualDifferences && updatedValidation.visualDifferences) &&
+        !(updatedValidation.settingsRejectUndefinedChanges && updatedValidation.undefinedChanges);
+      
+      if (onlyFailedDueToLegislation) {
+        updatedValidation.valid = true;
+      }
+    }
+    
+    setProcessedValidation(updatedValidation);
+  }, [validation]);
   
-  if (!validation) {
-    return (
-      <div className="validation-error">
-        <AlertTriangle size={48} className="error-icon" />
-        <h3>{t('noValidation')}</h3>
-        <p>{t('validationDataMissing')}</p>
-      </div>
-    );
+  // Wait until we've processed the validation
+  if (!processedValidation) {
+    if (!validation) {
+      return (
+        <div className="validation-error">
+          <AlertTriangle size={48} className="error-icon" />
+          <h3>{t('noValidation')}</h3>
+          <p>{t('validationDataMissing')}</p>
+        </div>
+      );
+    }
+    return <div>Processing validation data...</div>;
   }
   
   // Use data as an alias for validation to minimize changes in the rest of the component
-  const data = validation;
+  const data = processedValidation;
 
+  // Check if document would be valid ignoring settings
+  const hasValidSignatures = data.validSignatures === data.totalSignatures && data.totalSignatures > 0;
+  
   // Determine if validation failed due to specific settings
   const failedDueToQuality = !data.valid && data.quality && data.settingsQuality && 
     !isHigherOrEqualQuality(data.quality, data.settingsQuality);
   
   const failedDueToLegislation = !data.valid && data.legislation && data.settingsLegislation && 
-    data.legislation !== data.settingsLegislation;
+    !isLegislationCompliant(data.legislation, data.settingsLegislation);
   
   const failedDueToLongTermValidation = !data.valid && data.settingsLongTermValidation && 
     !data.longTermValidation;
@@ -127,22 +167,12 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
   // Determine if the validation failure is only due to settings
   const failedDueToSettingsOnly = 
     !data.valid && 
-    data.validSignatures > 0 && 
+    hasValidSignatures && 
     (failedDueToQuality || 
      failedDueToLegislation || 
      failedDueToLongTermValidation || 
      failedDueToVisualDifferences || 
      failedDueToUndefinedChanges);
-
-  // Helper function to determine if a quality meets or exceeds the required level
-  function isHigherOrEqualQuality(actual: SignatureQuality, required: SignatureQuality): boolean {
-    const levels: Record<SignatureQuality, number> = {
-      'SES': 1,
-      'AES': 2,
-      'QES': 3
-    };
-    return levels[actual] >= levels[required];
-  }
 
   // Prepare failure reasons for display
   const failureReasons: FailureReason[] = [];
@@ -566,8 +596,6 @@ export default function ValidationResults({ validation, signerInfo, isLoadingSig
                 <HelpCircle size={14} />
               </Tooltip>
             </h4>
-            {/* Log signers right before passing to the component */}
-            {(() => { console.log("About to render SignerInfoDisplay with:", signerInfo); return null; })()}
             <SignerInfoDisplay signers={signerInfo} isLoading={isLoadingSigners} />
           </div>
         )}
