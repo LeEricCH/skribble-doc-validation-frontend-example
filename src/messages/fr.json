@@ -8,6 +8,99 @@
       "francais": "Français"
     }
   },
+  "Onboarding": {
+    "welcomeTitle": "Bienvenue à la Démo de l'API Skribble",
+    "welcomeSubtitle": "Découvrez la signature et la validation de documents avec Skribble",
+    "features": {
+      "electronicSigning": "Signature électronique",
+      "electronicSigningDescription": "Signez des documents avec des signatures électroniques avancées (AES)",
+      "secureProcess": "Processus sécurisé",
+      "secureProcessDescription": "Workflow de signature électronique conforme",
+      "validation": "Validation",
+      "validationDescription": "Vérifiez l'authenticité et l'intégrité des documents"
+    },
+    "welcomeText": "Cette démo présente les API de Signature et de Validation de Skribble. Vous allez créer une demande de signature, signer un document à l'aide d'une AES et le valider pour vérifier son authenticité.",
+    "beginButton": "Commencer la démo",
+    "steps": {
+      "welcome": "Bienvenue",
+      "welcomeDescription": "Introduction à la démo de l'API Skribble",
+      "createRequest": "Créer une demande",
+      "createRequestDescription": "Saisissez vos informations pour créer une demande de signature",
+      "signDocument": "Signer le document",
+      "signDocumentDescription": "Signez le document électroniquement avec une AES",
+      "validateDocument": "Valider le document",
+      "validateDocumentDescription": "Vérifiez le document signé",
+      "complete": "Terminé",
+      "completeDescription": "Démo terminée avec succès"
+    },
+    "securityVerification": "Vérification de sécurité",
+    "securityVerificationText": "Veuillez compléter la vérification de sécurité ci-dessous pour continuer.",
+    "createRequest": {
+      "title": "Créer une demande de signature",
+      "description": "Pour commencer, nous avons besoin de votre adresse e-mail pour créer une demande de signature numérique. Nous générerons un document exemple que vous pourrez signer en utilisant la plateforme sécurisée de Skribble.",
+      "detailsTitle": "Saisissez vos informations ci-dessous :",
+      "emailLabel": "Adresse e-mail",
+      "emailPlaceholder": "vous@exemple.com",
+      "emailDisclaimer": "Votre e-mail est uniquement utilisé pour cette démo et ne sera pas stocké de façon permanente.",
+      "info": "Une fois soumis, nous créerons une demande de signature et préparerons un document à signer."
+    },
+    "signDocument": {
+      "title": "Signez votre document",
+      "readyTitle": "Prêt pour la signature sécurisée",
+      "description": "Vous allez maintenant être redirigé vers la plateforme de signature sécurisée de Skribble pour signer le document à l'aide d'une signature électronique avancée (AES).",
+      "redirectNote": "Après la signature, vous serez automatiquement redirigé vers cette application pour valider votre document signé.",
+      "disclaimer": "La signature sera juridiquement valide mais le document est uniquement à des fins de démonstration."
+    },
+    "documentSigned": {
+      "title": "Document signé avec succès",
+      "banner": "Votre document a été signé !",
+      "description": "Le document a été signé avec une signature électronique avancée (AES). Cette signature est juridiquement valide conformément aux réglementations eIDAS.",
+      "nextStep": "Prochaine étape : Validez votre document pour garantir son authenticité",
+      "signedAt": "Document signé le",
+      "validationProcessTitle": "Processus de validation du document",
+      "validationProcessDescription": "À l'étape suivante, nous validerons votre document signé pour vérifier son authenticité et son intégrité à l'aide de l'API de Validation Skribble.",
+      "validationChecks": "Le processus de validation vérifie :",
+      "checks": {
+        "digitalSignature": "Vérification de la signature numérique",
+        "certificateValidity": "Validité du certificat",
+        "documentIntegrity": "Intégrité du document depuis la signature",
+        "timestampVerification": "Vérification de l'horodatage"
+      }
+    },
+    "complete": {
+      "title": "Félicitations !",
+      "subtitle": "Vous avez terminé avec succès la démo d'intégration de l'API Skribble.",
+      "description": "Vous avez expérimenté le flux complet des API E-Signing et Validation de Skribble :",
+      "steps": {
+        "createRequest": "Création d'une demande de signature",
+        "signDocument": "Signature électronique d'un document avec AES",
+        "validateDocument": "Validation du document signé"
+      },
+      "nextSteps": "Vous pouvez maintenant accéder au Validateur de Documents pour explorer plus de fonctionnalités de validation."
+    },
+    "buttons": {
+      "continue": "Continuer",
+      "completeVerification": "Veuillez compléter la vérification",
+      "createRequest": "Créer une demande de signature",
+      "creating": "Création en cours...",
+      "proceedToSigning": "Procéder à la signature",
+      "loading": "Chargement...",
+      "validateDocument": "Valider le document",
+      "goToValidator": "Aller au validateur de documents"
+    }
+  },
+  "SuccessDialog": {
+    "title": "Validation terminée",
+    "message": "Vous avez terminé avec succès le workflow de signature et de validation de document.",
+    "subtitle": "Votre document a passé par le processus complet de Skribble :",
+    "steps": {
+      "requestCreated": "Demande de signature de document créée",
+      "documentSigned": "Document signé électroniquement",
+      "validationCompleted": "Validation de signature numérique terminée"
+    },
+    "banner": "Workflow terminé - Vous pouvez maintenant consulter le rapport de validation",
+    "viewReport": "Voir le rapport de validation"
+  },
   "Validator": {
     "title": "Validation de Document",
     "description": "Téléchargez des documents pour vérifier leurs signatures et leur authenticité",

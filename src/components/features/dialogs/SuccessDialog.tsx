@@ -5,6 +5,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import confettiLib from 'canvas-confetti'
 import '@/styles/success-dialog.css'
 import dynamic from 'next/dynamic'
+import { useTranslations } from 'next-intl'
 
 // Dynamically import Dialog with SSR disabled to avoid hydration issues
 const Dialog = dynamic(
@@ -18,6 +19,7 @@ interface SuccessDialogProps {
 }
 
 export default function SuccessDialog({ open = false, onClose }: SuccessDialogProps) {
+  const t = useTranslations('SuccessDialog');
   const [isOpen, setIsOpen] = useState(open);
   
   // Check localStorage for showSuccessAfterValidation flag with a delay
@@ -99,28 +101,28 @@ export default function SuccessDialog({ open = false, onClose }: SuccessDialogPr
           <EmojiEventsIcon className="trophy-icon" />
         </div>
         <Typography variant="h4" className="success-title" component="div">
-          Validation Complete
+          {t('title')}
         </Typography>
       </div>
       
       <DialogContent className="success-dialog-content">
         <Box sx={{ textAlign: 'center', py: 2 }}>
           <Typography variant="body1" paragraph className="success-message">
-            You have successfully completed the document signing and validation workflow.
+            {t('message')}
           </Typography>
           <Typography variant="body1" className="success-subtitle">
-            Your document has gone through the complete Skribble process:
+            {t('subtitle')}
           </Typography>
           <Box component="ul" className="success-steps">
-            <li>Document signing request created</li>
-            <li>Document electronically signed</li>
-            <li>Digital signature validation completed</li>
+            <li>{t('steps.requestCreated')}</li>
+            <li>{t('steps.documentSigned')}</li>
+            <li>{t('steps.validationCompleted')}</li>
           </Box>
           
           <Box className="success-banner">
             <CheckCircleIcon className="check-icon" />
             <Typography variant="body2" component="div">
-              Workflow complete - You can now view the validation report
+              {t('banner')}
             </Typography>
           </Box>
         </Box>
@@ -134,7 +136,7 @@ export default function SuccessDialog({ open = false, onClose }: SuccessDialogPr
           size="large"
           className="view-report-button"
         >
-          View Validation Report
+          {t('viewReport')}
         </Button>
       </DialogActions>
     </Dialog>
