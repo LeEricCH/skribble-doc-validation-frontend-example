@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { SigningApiClient } from '@/lib/SigningApiClient';
+import { verifyTurnstile, createErrorResponse } from '@/lib/TurnstileVerifier';
 
 type RouteParams = {
   params: {
@@ -32,6 +33,16 @@ export async function GET(
         { error: 'Signature request ID is required' },
         { status: 400 }
       );
+    }
+    
+    // Verify Turnstile token using our utility
+    const verificationResult = await verifyTurnstile({
+      request,
+      tokenFromHeader: true
+    });
+
+    if (!verificationResult.success) {
+      return createErrorResponse(verificationResult);
     }
     
     // Initialize API client
