@@ -251,7 +251,7 @@ export class SigningApiClient {
         }
       ],
       content: pdfBase64,
-      quality: "DEMO",
+      quality: "AES",
       legislation: "ZERTES"
     };
 
