@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { 
   Button, 
   Typography, 
@@ -60,7 +60,33 @@ const steps = [
   }
 ];
 
+// Wrap the component that uses useSearchParams in a Suspense boundary
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<OnboardingLoader />}>
+      <OnboardingContent />
+    </Suspense>
+  );
+}
+
+// Loading component for the Suspense boundary
+function OnboardingLoader() {
+  return (
+    <MainContent
+      title="Skribble API Demo"
+      description="Experience Skribble's E-Signing and Validation APIs"
+    >
+      <Container maxWidth="md" sx={{ mt: 4, pb: 6 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
+          <CircularProgress size={60} />
+        </Box>
+      </Container>
+    </MainContent>
+  );
+}
+
+// Main component with all the onboarding functionality
+function OnboardingContent() {
   const t = useTranslations('Onboarding');
   const [activeStep, setActiveStep] = useState(-1); // Start with welcome screen
   const [email, setEmail] = useState('');
