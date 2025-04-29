@@ -182,6 +182,9 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500 }}>
               {t('quality.label')}
+            </Typography>   
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              {t('quality.helper')}
             </Typography>
             
             <RadioGroup
@@ -251,10 +254,6 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
                 ))}
               </Box>
             </RadioGroup>
-            
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              {t('quality.helper')}
-            </Typography>
           </Box>
           
           {/* Legislation */}
@@ -262,7 +261,9 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500 }}>
               {t('legislation.label')}
             </Typography>
-            
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              {t('legislation.helper')}
+            </Typography>
             <RadioGroup
               value={localSettings.legislation || 'WORLD'}
               onChange={handleLegislationChange}
@@ -383,10 +384,6 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
                 ))}
               </Box>
             </RadioGroup>
-            
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-              {t('legislation.helper')}
-            </Typography>
           </Box>
         </AccordionDetails>
       </Accordion>
