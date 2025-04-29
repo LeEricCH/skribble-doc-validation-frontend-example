@@ -16,6 +16,7 @@ import { getValidationStatus } from '@/utils/validationUtils'
 // Batch validation result type
 interface BatchValidationResult {
   batch: {
+    id?: string;
     summary: {
       totalFiles: number;
       validFiles: number;
@@ -169,7 +170,7 @@ export default function ValidatePage() {
       
       const data = await response.json();
       
-      // Check if this is a batch validation response
+      // Check if this is a batch validation response structure
       if (data.batch && Array.isArray(data.results)) {
         // Handle batch validation
         handleBatchValidation(data as BatchValidationResult);
@@ -190,6 +191,13 @@ export default function ValidatePage() {
   
   // Handle single file validation
   const handleSingleValidation = async (validationResponse: ValidationResponse) => {
+    // Make sure we have a valid ID
+    if (!validationResponse.id) {
+      console.error('Validation response missing ID:', validationResponse);
+      setError(t('missingValidationId'));
+      return;
+    }
+    
     // Add additional metadata to the validation response
     const augmentedData = {
       ...validationResponse,
@@ -224,8 +232,20 @@ export default function ValidatePage() {
   const handleBatchValidation = (batchData: BatchValidationResult) => {
     console.log("Processing batch validation results:", batchData.results.length);
     
+    // Generate a unique batch ID if not already present
+    const batchId = batchData.batch.id || `batch-${Date.now()}`;
+    
+    // Add batch ID to the data
+    const batchDataWithId = {
+      ...batchData,
+      batch: {
+        ...batchData.batch,
+        id: batchId
+      }
+    };
+    
     // Save the batch data for access in the validation page
-    validationStorage.saveBatchValidationData(batchData);
+    validationStorage.saveBatchValidationData(batchDataWithId);
     
     // Add each result to history and storage
     for (const result of batchData.results) {
@@ -249,7 +269,8 @@ export default function ValidatePage() {
           ...result,
           filename: result.originalFile,
           validationTimestamp: new Date().toISOString(),
-          settings: batchData.batch.settings
+          settings: batchData.batch.settings,
+          batchId: batchData.results.length > 1 ? batchId : undefined // Only add batchId for actual batches
         };
         
         // Save full validation data to localStorage
@@ -259,8 +280,12 @@ export default function ValidatePage() {
     
     // For batch validation with results, redirect to the first validation result
     if (batchData.results.length > 0 && batchData.results[0].id) {
-      // Redirect to the first result, with a query param to indicate this is part of a batch
-      router.push(`/validation/${batchData.results[0].id}?batch=true`);
+      // Only add batch=true parameter if there are multiple results
+      const url = batchData.results.length > 1
+        ? `/validation/${batchData.results[0].id}?batch=true`
+        : `/validation/${batchData.results[0].id}`;
+      
+      router.push(url);
     } else {
       // Fallback to history if no results
       router.push('/history');

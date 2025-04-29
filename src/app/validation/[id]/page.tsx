@@ -73,7 +73,17 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
           
           // Check if this validation is part of a batch
           const validateBatchId = storedData.batchId as string;
-          const checkForBatch = validateBatchId || searchParams.get('batch') === 'true';
+          let checkForBatch = false;
+          
+          // Only consider it a batch if we have multiple results
+          if (validateBatchId) {
+            const batchData = validationStorage.getBatchById(validateBatchId);
+            checkForBatch = !!(batchData && Array.isArray(batchData.results) && batchData.results.length > 1);
+          } else if (searchParams.get('batch') === 'true') {
+            // Legacy support for the batch parameter - only if we have multiple results
+            const batchData = validationStorage.getBatchValidationData();
+            checkForBatch = !!(batchData && Array.isArray(batchData.results) && batchData.results.length > 1);
+          }
           
           if (checkForBatch) {
             console.log('This validation is part of a batch:', validateBatchId);
