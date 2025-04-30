@@ -31,7 +31,8 @@ export const config = {
      * 1. /api routes
      * 2. /_next (internal Next.js paths)
      * 3. /onboarding (to avoid redirect loops)
+     * 4. static files (images, etc.)
      */
-    '/((?!api|_next|onboarding).*)',
+    '/((?!api|_next|onboarding|images|favicon.ico).*)',
   ],
 }; 

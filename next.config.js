@@ -2,7 +2,8 @@
 const path = require('path');
 const createNextIntlPlugin = require('next-intl/plugin');
 
-const withNextIntl = createNextIntlPlugin();
+// Create a next-intl plugin that doesn't use URL-based localization
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig = {
   images: {
