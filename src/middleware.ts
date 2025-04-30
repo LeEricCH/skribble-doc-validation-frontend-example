@@ -12,6 +12,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Check if e-signing demo is enabled
+  const enableEsigningDemo = process.env.NEXT_PUBLIC_ENABLE_ESIGNING_DEMO === 'true';
+  
+  // If e-signing demo is disabled, skip onboarding check
+  if (!enableEsigningDemo) {
+    return NextResponse.next();
+  }
+
   // Check if onboarding has been completed
   const onboardingCompleted = request.cookies.get('onboardingCompleted')?.value === 'true';
   
