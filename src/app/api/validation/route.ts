@@ -96,27 +96,40 @@ export async function POST(request: Request) {
           if (!result.filename) {
             result.filename = file.name;
           }
+
+          // Fetch ETSI XML report for this validation
+          let xmlReport = '';
+          try {
+            xmlReport = await apiClient.getEtsiValidationReport(result.id);
+          } catch (reportError) {
+            console.error(`Error fetching ETSI report for validation ${result.id}:`, reportError);
+            // Continue even if report fetch fails
+          }
           
           const enhancedResult = {
             ...result,
             originalFile: file.name,
             size: file.size,
-            error: null
+            error: null,
+            xmlReport,
+            // Extract signer information from additionalInfos
+            signers: result.additionalInfos?.signer || []
           };
           
-          console.log(`Returning validation result with size: ${enhancedResult.size} bytes`);
+          console.log(`Returning validation result with size: ${enhancedResult.size} bytes and XML report length: ${xmlReport.length} bytes`);
           return enhancedResult;
         } catch (error) {
           console.error(`Error validating file ${file.name}, size: ${file.size} bytes:`, error);
           // Return structured error for this specific file
           return {
-            id: `error-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             valid: false,
             originalFile: file.name,
             size: file.size,
             signatures: 0,
             validSignatures: 0,
-            error: error instanceof Error ? error.message : 'Unknown error during validation'
+            error: error instanceof Error ? error.message : 'Unknown error during validation',
+            xmlReport: ''
           };
         }
       })
@@ -135,11 +148,26 @@ export async function POST(request: Request) {
     // Enhanced response with batch information
     const batchResponse = {
       batch: {
+        id: `batch-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        timestamp: new Date().toISOString(),
         summary: batchSummary,
-        settings: validationSettings
+        settings: validationSettings,
+        validationIds: validationResults.map(r => r.id).filter(Boolean)
       },
-      results: validationResults
+      results: validationResults.map(result => ({
+        ...result,
+        xmlReport: result.xmlReport || '',
+        originalFile: result.originalFile || '',
+        size: result.size || 0,
+        error: result.error || null
+      }))
     };
+
+    console.log('API Route: Sending response with results:', {
+      totalResults: batchResponse.results.length,
+      resultsWithXml: batchResponse.results.filter(r => r.xmlReport).length,
+      firstResultXmlLength: batchResponse.results[0]?.xmlReport?.length || 0
+    });
 
     return NextResponse.json(batchResponse, { status: 200 });
 

@@ -30,6 +30,7 @@ import {
   Chip,
   Button
 } from '@mui/material'
+import validationStorage from '@/utils/validationStorage'
 
 interface TechnicalDetailsProps {
   validationId: string
@@ -73,42 +74,41 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ validationId }) => 
 
   // Fetch the ETSI report
   useEffect(() => {
-    const fetchReport = async () => {
-      if (!validationId) {
-        setLoading(false)
-        return
-      }
-
-      try {
-        setLoading(true)
-        const response = await fetch(`/api/reports/${validationId}/etsi`)
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch ETSI report: ${response.status} ${response.statusText}`)
-        }
-        
-        const xml = await response.text()
-        setXmlReport(xml)
-        
-        // Parse the report using utility functions
-        const parsedData = parseEtsiReport(xml)
-        if (!parsedData) {
-          throw new Error('Failed to parse ETSI report')
-        }
-        
-        setTechnicalData(parsedData)
-        setValidationScore(calculateValidationScore(parsedData))
-        setTrustChainData(extractTrustChain(xml))
-        setLoading(false)
-      } catch (err) {
-        console.error('Error fetching ETSI report:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load technical details')
-        setLoading(false)
-      }
+    if (!validationId) {
+      setLoading(false)
+      return
     }
 
-    fetchReport()
-  }, [validationId])
+    setLoading(true)
+    const storedData = validationStorage.getValidationData(validationId)
+
+    if (!storedData || !storedData.xmlReport) {
+      setError(t('reportUnavailable'))
+      setLoading(false)
+      return
+    }
+
+    if (typeof storedData.xmlReport === 'string') {
+      setXmlReport(storedData.xmlReport)
+    } else {
+      setError(t('reportUnavailable'))
+      setLoading(false)
+      return
+    }
+
+    // Parse the report using utility functions
+    const parsedData = parseEtsiReport(storedData.xmlReport)
+    if (!parsedData) {
+      setError('Failed to parse ETSI report')
+      setLoading(false)
+      return
+    }
+
+    setTechnicalData(parsedData)
+    setValidationScore(calculateValidationScore(parsedData))
+    setTrustChainData(extractTrustChain(storedData.xmlReport))
+    setLoading(false)
+  }, [validationId, t])
 
   const getScoreColor = (score: number): string => {
     if (score >= 80) return '#22c55e'
@@ -213,7 +213,8 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ validationId }) => 
 
   const constraintsPassed = technicalData.constraints.filter(c => 
     c.ValidationStatus?.MainIndication.includes('passed')).length;
-  const totalConstraints = technicalData.constraints.length;
+  const totalConstraints = technicalData.constraints.filter(c => 
+    c.ValidationStatus).length;
 
   return (
     <div className="technical-details-container">
@@ -512,9 +513,11 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ validationId }) => 
               </Box>
             </AccordionSummary>
             <AccordionDetails sx={{ p: 2.5 }}>
-              {technicalData.constraints.length > 0 ? (
+              {technicalData.constraints.filter(c => c.ValidationStatus).length > 0 ? (
                 <div className="constraints-list">
-                  {technicalData.constraints.map((constraint, i) => {
+                  {technicalData.constraints
+                    .filter(c => c.ValidationStatus)
+                    .map((constraint, i) => {
                     const status = constraint.ValidationStatus?.MainIndication.includes('passed') 
                       ? 'passed' 
                       : constraint.ValidationStatus?.MainIndication.includes('failed')
@@ -558,7 +561,7 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ validationId }) => 
           </Accordion>
         </div>
         
-        <div className="technical-footer no-print">
+        <div className="technical-footer no-print" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Button
             variant="outlined"
             startIcon={<FileDown size={16} />}

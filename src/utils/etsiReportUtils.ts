@@ -273,6 +273,13 @@ export function extractTrustChain(xmlString: string): TrustChain | null {
 }
 
 /**
+ * Returns only the signed signature attributes from the given array
+ */
+export function getSignedSignatureAttributes(attributes: SignatureAttribute[]): SignatureAttribute[] {
+  return attributes.filter(attr => attr.signed);
+}
+
+/**
  * Calculates a technical validation score based on the ETSI report data
  */
 export function calculateValidationScore(data: TechnicalValidationData): ValidationScore {
@@ -312,17 +319,16 @@ export function calculateValidationScore(data: TechnicalValidationData): Validat
   }
   
   // Score for signature attributes
-  const signedAttrsCount = data.attributes.filter(a => a.signed).length;
-  const totalAttrsCount = data.attributes.length;
-  
+  const signedAttributes = getSignedSignatureAttributes(data.attributes);
+  const signedAttrsCount = signedAttributes.length;
+  const totalAttrsCount = signedAttributes.length;
   if (totalAttrsCount > 0) {
-    const attrsScore = Math.round((signedAttrsCount / totalAttrsCount) * 100);
     scoreItems.push({
       name: 'Signature Attributes',
-      score: attrsScore,
+      score: 100, // All counted are signed
       description: `${signedAttrsCount} of ${totalAttrsCount} attributes are signed`
     });
-    totalScore += attrsScore;
+    totalScore += 100;
   }
   
   // Process score

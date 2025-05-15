@@ -49,6 +49,12 @@ export interface ValidationResponse {
   validationDetails?: Record<string, unknown>;
   formatDetails?: Record<string, unknown>;
   signerDetails?: Record<string, unknown>;
+  additionalInfos?: {
+    signer?: SignerInfo[];
+    validation?: {
+      indication?: string;
+    };
+  };
 }
 
 // Certificate information for a signer

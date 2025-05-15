@@ -7,108 +7,11 @@ import MainContent from '@/components/layout/MainContent'
 import DocumentUploader from '@/components/features/validator/DocumentUploader'
 import ValidationSettingsPanel from '@/components/features/validator/ValidationSettingsPanel'
 import type { ValidationResponse, ValidationOptions } from '@/types/validation'
-import validationHistory from '@/utils/validationHistory'
-import signingStorage from '@/utils/signingStorage'
+import type { BatchValidationResult } from '@/utils/validationStorage'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import '@/styles/batch-validation.css'
-import { getValidationStatus } from '@/utils/validationUtils'
-
-// Batch validation result type
-interface BatchValidationResult {
-  batch: {
-    id?: string;
-    summary: {
-      totalFiles: number;
-      validFiles: number;
-      invalidFiles: number;
-      errorFiles: number;
-    },
-    settings?: ValidationOptions;
-  },
-  results: (ValidationResponse & { 
-    originalFile?: string;
-    error?: string | null; 
-  })[];
-}
-
-// Define the type for stored validation data
-interface StoredValidationData {
-  [id: string]: ValidationResponse & { 
-    filename?: string;
-    size?: number;
-    validationTimestamp?: string;
-    settings?: ValidationOptions;
-    [key: string]: unknown;  // Add index signature to make compatible with Record<string, unknown>
-  };
-}
-
-// Create a new validation storage service to store complete validation data
-const validationStorage = {
-  // Store complete validation data
-  saveValidationData: (id: string, data: ValidationResponse & Record<string, unknown>): void => {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      // Get existing validation data
-      const existingDataStr = localStorage.getItem('validationData') || '{}';
-      const existingData = JSON.parse(existingDataStr) as StoredValidationData;
-      
-      // Add new validation data
-      existingData[id] = data;
-      
-      // Save back to localStorage
-      localStorage.setItem('validationData', JSON.stringify(existingData));
-    } catch (err) {
-      console.error('Error saving validation data to localStorage:', err);
-    }
-  },
-  
-  // Save batch validation data
-  saveBatchValidationData: (batchData: BatchValidationResult): void => {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      localStorage.setItem('batchValidationData', JSON.stringify(batchData));
-    } catch (err) {
-      console.error('Error saving batch validation data to localStorage:', err);
-    }
-  },
-  
-  // Get batch validation data
-  getBatchValidationData: (): BatchValidationResult | null => {
-    if (typeof window === 'undefined') return null;
-    
-    try {
-      const dataStr = localStorage.getItem('batchValidationData');
-      if (!dataStr) return null;
-      return JSON.parse(dataStr) as BatchValidationResult;
-    } catch (err) {
-      console.error('Error getting batch validation data from localStorage:', err);
-      return null;
-    }
-  },
-  
-  // Get validation data by ID
-  getValidationData: (id: string): (ValidationResponse & Record<string, unknown>) | null => {
-    if (typeof window === 'undefined') return null;
-    
-    try {
-      const dataStr = localStorage.getItem('validationData') || '{}';
-      const data = JSON.parse(dataStr) as StoredValidationData;
-      return data[id] || null;
-    } catch (err) {
-      console.error('Error getting validation data from localStorage:', err);
-      return null;
-    }
-  },
-  
-  // Clear all validation data
-  clearValidationData: (): void => {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem('validationData');
-  }
-};
+import validationStorage from '@/utils/validationStorage'
 
 export default function ValidatePage() {
   const t = useTranslations('Validator')
@@ -116,151 +19,11 @@ export default function ValidatePage() {
   const [validationComplete, setValidationComplete] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [isLoadingDocument, setIsLoadingDocument] = useState(false)
+  const [isLoadingDocument ] = useState(false)
   const router = useRouter()
   
   // Get validation settings from localStorage if available
   const [validationSettings, setValidationSettings] = useState<ValidationOptions | null>(null);
-
-  // Check for returning from the onboarding flow with a document to validate
-  useEffect(() => {
-    const loadSignedDocument = async () => {
-      const shouldValidateSignedDocument = localStorage.getItem('validateSignedDocument') === 'true';
-      
-      console.log('Checking for signed document to validate:', shouldValidateSignedDocument);
-      
-      if (shouldValidateSignedDocument && selectedFiles.length === 0) {
-        console.log('Attempting to load signed document for validation');
-        setIsLoadingDocument(true);
-        
-        try {
-          const activeRequestId = signingStorage.getActiveRequest();
-          console.log('Active request ID:', activeRequestId);
-          
-          if (activeRequestId) {
-            // First check if document is stored in signing storage
-            let documentContent = signingStorage.getDocumentContent(activeRequestId);
-            console.log('Document content from storage:', documentContent ? `Found (${documentContent.length} bytes)` : 'Not found');
-            
-            // Get request data to find document ID (we need this regardless)
-            const requestData = signingStorage.getSignatureData(activeRequestId);
-            console.log('Signature request data:', requestData ? 'Found' : 'Not found', requestData?.document_id ? `(document_id: ${requestData.document_id})` : '');
-            
-            // If coming from onboarding flow or content is missing, always fetch fresh document from API
-            if (!documentContent || localStorage.getItem('validateSignedDocument') === 'true') {
-
-              // Check for document ID in different possible property names
-              const docId = requestData?.document_id || 
-                           (requestData?.documents?.[0]?.id) || 
-                           (Array.isArray(requestData?.documents_ids) ? requestData?.documents_ids[0] : undefined);
-              
-      
-
-              if (docId) {
-                // Fetch document content from API
-                const documentResponse = await fetch(`/api/signing/document/${docId}?format=json`);
-                
-                if (documentResponse.ok) {
-                  const documentData = await documentResponse.json();
-
-                  if (documentData.content) {
-                    documentContent = documentData.content;
-                    // Save document content for future use
-                    if (documentContent) {
-                      signingStorage.saveDocumentContent(activeRequestId, documentContent);
-                    }
-                  }
-                } else {
-                  console.error("Failed to fetch document from API:", documentResponse.status);
-                }
-              }
-            }
-            
-            // Convert document content to File object if found
-            if (documentContent) {
-              // Check if the content seems like a valid PDF (should be larger than 1KB at minimum)
-              if (documentContent.length < 1000) {
-                console.warn("Document content seems too small for a valid PDF, attempting to fetch from API");
-                
-                // Check for document ID in different possible property names
-                const docId = requestData?.document_id || 
-                            (requestData?.documents?.[0]?.id) || 
-                            (Array.isArray(requestData?.documents_ids) ? requestData?.documents_ids[0] : undefined);
-                
-                if (docId) {
-                  // Try to fetch document content from API as fallback
-                  const documentResponse = await fetch(`/api/signing/document/${docId}?format=json`);
-                  
-                  if (documentResponse.ok) {
-                    const documentData = await documentResponse.json();
-                    if (documentData.content && documentData.content.length > 1000) {
-                      documentContent = documentData.content;
-                      // Use type assertion to ensure TypeScript knows documentContent is a string
-                      signingStorage.saveDocumentContent(activeRequestId, documentContent as string);
-                    } else {
-                      console.error("API returned invalid or small document content");
-                      setError("Could not load a valid signed document from the API.");
-                      setIsLoadingDocument(false);
-                      return;
-                    }
-                  } else {
-                    console.error("Failed to fetch document as fallback:", documentResponse.status);
-                    setError("Could not load the signed document. Please upload it manually.");
-                    setIsLoadingDocument(false);
-                    return;
-                  }
-                } else {
-                  console.error("No document ID available for fallback fetch");
-                  setError("Could not find document ID. Please upload the document manually.");
-                  setIsLoadingDocument(false);
-                  return;
-                }
-              }
-              
-              try {
-                // Since we're inside the if(documentContent) block, we can safely cast to string
-                const content = documentContent as string;
-                const base64Data = content.includes('data:') 
-                  ? content.split(',')[1] 
-                  : content;
-                
-                // Create a blob directly from base64
-                const binary = atob(base64Data);
-                const array = [];
-                for (let i = 0; i < binary.length; i++) {
-                  array.push(binary.charCodeAt(i));
-                }
-                
-                // Create blob from binary data
-                const blob = new Blob([new Uint8Array(array)], {type: 'application/pdf'});
-                
-                // Create a File object
-                const file = new File([blob], `signed-document-${activeRequestId}.pdf`, {type: 'application/pdf'});
-                // Add the file to the state
-                setSelectedFiles([file]);
-                
-                // Clear the flag so we don't keep trying to load on subsequent renders
-                localStorage.removeItem('validateSignedDocument');
-              } catch (error) {
-                console.error("Error creating file object:", error);
-                setError("Error creating the signed document file. Please upload it manually.");
-              }
-            } else {
-              console.error("No document content found");
-              setError("Could not load the signed document. Please upload it manually.");
-            }
-          }
-        } catch (error) {
-          console.error("Error loading signed document:", error);
-          setError("Error loading the signed document. Please upload it manually.");
-        } finally {
-          setIsLoadingDocument(false);
-        }
-      }
-    };
-    
-    loadSignedDocument();
-  }, [selectedFiles.length]);
 
   useEffect(() => {    
     // Retrieve settings from localStorage when component mounts
@@ -276,51 +39,42 @@ export default function ValidatePage() {
     }
   }, []);
 
+  // Handle file upload
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) return;
-    
+    if (selectedFiles.length === 0) {
+      setError(t('noFilesSelected'));
+      return;
+    }
+
     setIsValidating(true);
     setError(null);
-    setValidationComplete(false);
-    
+
     try {
-      // Create form data
+      // Always use batch endpoint, even for single files
       const formData = new FormData();
-      
-      // For batch validation, append files with unique keys
-      selectedFiles.forEach((file, index) => {
-        formData.append(`file${index}`, file);
-      });
+      for (const file of selectedFiles) {
+        formData.append('file', file);
+      }
       
       // Add validation settings if available
       if (validationSettings) {
         formData.append('settings', JSON.stringify(validationSettings));
       }
-      
-      // Send request to API
-      const response = await fetch('/api/validate', {
+
+      const response = await fetch('/api/validation', {
         method: 'POST',
-        body: formData,
+        body: formData
       });
-      
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || t('validationError'));
+        throw new Error(t('validationError'));
       }
+
+      const batchData = await response.json();
+      console.log('Received batch validation response:', batchData);
       
-      const data = await response.json();
-      
-      // Check if this is a batch validation response structure
-      if (data.batch && Array.isArray(data.results)) {
-        // Handle batch validation
-        handleBatchValidation(data as BatchValidationResult);
-      } else {
-        // Single file validation
-        await handleSingleValidation(data as ValidationResponse);
-      }
-      
-      setValidationComplete(true);
-      
+      // Always handle as batch
+      handleBatchValidation(batchData);
     } catch (err) {
       console.error('Validation error:', err);
       setError(err instanceof Error ? err.message : t('unknownError'));
@@ -328,143 +82,44 @@ export default function ValidatePage() {
       setIsValidating(false);
     }
   };
-  
-  // Handle single file validation
-  const handleSingleValidation = async (validationResponse: ValidationResponse) => {
-    // Make sure we have a valid ID
-    if (!validationResponse.id) {
-      console.error('Validation response missing ID:', validationResponse);
-      setError(t('missingValidationId'));
-      return;
-    }
-    
-    // Add additional metadata to the validation response
-    const augmentedData = {
-      ...validationResponse,
-      filename: selectedFiles[0].name,
-      size: selectedFiles[0].size,
-      validationTimestamp: new Date().toISOString(),
-      settings: validationSettings || undefined
-    };
-    
-    // Determine if this is a case of requirements not met
-    const status = getValidationStatus(validationResponse, validationSettings || undefined);
-    
-    // Save to validation history
-    validationHistory.addToHistory({
-      id: validationResponse.id,
-      filename: selectedFiles[0].name,
-      timestamp: new Date().toISOString(),
-      valid: validationResponse.valid,
-      totalSignatures: validationResponse.signatures,
-      validSignatures: validationResponse.validSignatures,
-      requirementsNotMet: status === 'requirementsNotMet'
-    });
-    
-    // Save full validation data to localStorage
-    validationStorage.saveValidationData(validationResponse.id, augmentedData);
-    
-    // Check if we need to show success dialog (coming from onboarding flow)
-    const validateSignedFlag = localStorage.getItem('validateSignedDocument');
-    
-    if (validateSignedFlag === 'true') {
-      localStorage.setItem('showSuccessAfterValidation', 'true');
-      
-      // DEBUG: Explicitly set flag values to make sure they're correct
-      localStorage.setItem('validateSignedDocument', 'true');
-      localStorage.setItem('showSuccessAfterValidation', 'true');
-      
-      router.push(`/validation/${validationResponse.id}?fromOnboarding=true`);
-    } else {
-      // After saving, redirect to validation results page without parameter
-      router.push(`/validation/${validationResponse.id}`);
-    }
-  };
-  
-  // Handle batch validation response
+
+  // Handle batch validation
   const handleBatchValidation = (batchData: BatchValidationResult) => {
-    
-    // Check if this is coming from onboarding
-    const validateSignedFlag = localStorage.getItem('validateSignedDocument');
-    
-    // Generate a unique batch ID if not already present
-    const batchId = batchData.batch.id || `batch-${Date.now()}`;
-    
-    // Add batch ID to the data
-    const batchDataWithId = {
-      ...batchData,
-      batch: {
-        ...batchData.batch,
-        id: batchId
-      }
-    };
-    
-    // Save the batch data for access in the validation page
-    validationStorage.saveBatchValidationData(batchDataWithId);
-    
-    // Add each result to history and storage
-    for (const result of batchData.results) {
-      if (result.id && result.originalFile) {
-        // Determine if this is a case of requirements not met
-        const status = getValidationStatus(result, batchData.batch.settings);
-        
-        // Add to history
-        validationHistory.addToHistory({
-          id: result.id,
-          filename: result.originalFile,
-          timestamp: new Date().toISOString(),
-          valid: result.valid,
-          totalSignatures: result.signatures,
-          validSignatures: result.validSignatures,
-          requirementsNotMet: status === 'requirementsNotMet'
-        });
-        
-        // Augment data with additional info
-        const augmentedData = {
-          ...result,
-          filename: result.originalFile,
-          validationTimestamp: new Date().toISOString(),
-          settings: batchData.batch.settings,
-          batchId: batchData.results.length > 1 ? batchId : undefined // Only add batchId for actual batches
-        };
-        
-        // Save full validation data to localStorage
-        validationStorage.saveValidationData(result.id, augmentedData);
-      }
+    // Generate a batch ID if one doesn't exist
+    if (!batchData.batch.id) {
+      batchData.batch.id = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     }
-    
-    // Handle success dialog if coming from onboarding
-    if (validateSignedFlag === 'true') {
-      localStorage.setItem('showSuccessAfterValidation', 'true');
-      
-      // For batch validation with results, redirect to the first validation result
-      if (batchData.results.length > 0 && batchData.results[0].id) {
-        const url = `/validation/${batchData.results[0].id}?fromOnboarding=true`;
-        router.push(url);
-        return;
-      }
+
+    // Add required fields
+    batchData.batch.timestamp = new Date().toISOString();
+    batchData.batch.validationIds = batchData.results.map((r: ValidationResponse) => r.id).filter(Boolean) as string[];
+
+    // Add settings to batch data
+    if (validationSettings) {
+      batchData.batch.settings = validationSettings;
     }
-    
-    // Normal flow (not from onboarding)
-    // For batch validation with results, redirect to the first validation result
-    if (batchData.results.length > 0 && batchData.results[0].id) {
-      // Only add batch=true parameter if there are multiple results
-      const url = batchData.results.length > 1
-        ? `/validation/${batchData.results[0].id}?batch=true`
-        : `/validation/${batchData.results[0].id}`;
-      
-      router.push(url);
-    } else {
-      // Fallback to history if no results
-      router.push('/history');
+
+    // Ensure each result has an ID and XML report
+    batchData.results = batchData.results.map(result => ({
+      ...result,
+      id: result.id || `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      xmlReport: (result as ValidationResponse & { xmlReport?: string }).xmlReport || ''
+    }));
+
+    // Save batch data
+    validationStorage.saveBatchValidationData(batchData);
+
+    // Navigate to the first validation result
+    if (batchData.results.length > 0) {
+      router.push(`/validation/${batchData.results[0].id}`);
     }
   };
 
+  // Reset validation state
   const resetValidation = () => {
-    setValidationComplete(false);
     setSelectedFiles([]);
     setError(null);
-    setValidationSettings(null);
+    setValidationComplete(false);
   };
 
   return (
