@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import React from 'react'
 import { Button, Alert, AlertTitle, Box, CircularProgress } from '@mui/material'
-import { FileCheck, RefreshCw, History, ArrowLeft } from 'lucide-react'
+import { RefreshCw, History, ArrowLeft } from 'lucide-react'
 import MainContent from '@/components/layout/MainContent'
 import ValidationResults from '@/components/features/validator/ValidationResults'
 import BatchValidationResults from '@/components/features/validator/BatchValidationResults'
@@ -124,15 +124,15 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
             setSignerInfo(batchResult.additionalInfos?.signer || []);
             
             // Set batch data for batch view
-            setBatchResults(batchData.results as BatchResult[]);
+            setBatchResults(batchData.results);
             setBatchSummary(batchData.batch.summary);
             setBatchSettings(batchData.batch.settings);
             const currentResultIndex = batchData.results.findIndex(r => r.id === validationId);
             if (currentResultIndex > -1) {
               setBatchResultIndex(currentResultIndex);
             }
+            checkForBatch = true; // Always show batch view if we have batch data
           }
-          checkForBatch = batchData.results.length > 1;
         }
       } else if (searchParams?.get('batch') === 'true') {
         const batchData = validationStorage.getBatchValidationData();
@@ -152,15 +152,15 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
             setSignerInfo(batchResult.additionalInfos?.signer || []);
             
             // Set batch data for batch view
-            setBatchResults(batchData.results as BatchResult[]);
+            setBatchResults(batchData.results);
             setBatchSummary(batchData.batch.summary);
             setBatchSettings(batchData.batch.settings);
             const currentResultIndex = batchData.results.findIndex(r => r.id === validationId);
             if (currentResultIndex > -1) {
               setBatchResultIndex(currentResultIndex);
             }
+            checkForBatch = true; // Always show batch view if we have batch data
           }
-          checkForBatch = batchData.results.length > 1;
         }
       } else {
         // Single validation case
@@ -247,9 +247,6 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
 
   return (
     <MainContent
-      title={t('resultsTitle')}
-      description={t('resultsDescription')}
-      icon={<FileCheck />}
     >
       {/* Success Dialog for completed onboarding flow */}
       <SuccessDialog />
@@ -294,13 +291,14 @@ export default function ValidationByIdPage({ params }: { params: { id: string } 
       )}
       
       {!isLoading && validationData && (
-        <Box sx={{ mb: 3 }}>
-          {isBatchValidation && batchSummary && batchResults.length > 0 ? (
+        <Box sx={{ mt: 15, mb: 3 }}>
+          {isBatchValidation && batchSummary && batchResults.length > 1 ? (
             <BatchValidationResults
               results={batchResults}
               batchInfo={{
                 summary: batchSummary,
-                settings: batchSettings
+                settings: batchSettings,
+                timestamp: validationData.validationTimestamp
               }}
               resultIndex={batchResultIndex}
             />

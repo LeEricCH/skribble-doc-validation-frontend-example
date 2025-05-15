@@ -1,20 +1,42 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, Paper, Typography, Box, IconButton, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
-import { History, Trash2, CheckCircle, AlertTriangle, FileText, Search, RefreshCw, AlertCircle } from 'lucide-react'
+import { 
+  Button, 
+  Paper, 
+  Typography, 
+  Box, 
+  Chip, 
+  useTheme,
+  Stack,
+  TextField
+} from '@mui/material'
+import { 
+  Trash2, 
+  CheckCircle, 
+  AlertTriangle, 
+  FileText, 
+  Search, 
+  RefreshCw, 
+  AlertCircle,
+  Clock,
+  UserCheck
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import MainContent from '@/components/layout/MainContent'
 import validationStorage from '@/utils/validationStorage'
 import type { ValidationResponse } from '@/types/validation'
 import type { BatchValidationResult } from '@/utils/validationStorage'
 import { useTranslations } from 'next-intl'
+import React from 'react'
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<BatchValidationResult[]>([])
   const [selectedValidation, setSelectedValidation] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
   const router = useRouter()
   const t = useTranslations('History')
+  const theme = useTheme()
 
   // Load history from localStorage on component mount
   useEffect(() => {
@@ -24,7 +46,10 @@ export default function HistoryPage() {
   // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleString()
+    return new Intl.DateTimeFormat('default', {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(date)
   }
 
   // Handle clearing all history
@@ -35,18 +60,7 @@ export default function HistoryPage() {
     }
   }
 
-  // Handle removing a single history item
-  const handleRemoveItem = (id: string, event: React.MouseEvent) => {
-    event.stopPropagation()
-    // Remove from history by clearing all data
-    validationStorage.clearValidationData()
-    setHistory([])
-    if (selectedValidation === id) {
-      setSelectedValidation(null)
-    }
-  }
-
-  // View validation result and download report
+  // View validation result
   const handleViewValidation = (id: string) => {
     setSelectedValidation(id)
     router.push(`/validation/${id}`)
@@ -54,12 +68,9 @@ export default function HistoryPage() {
 
   // Function to determine if requirements are not met
   const isRequirementsNotMet = (item: ValidationResponse): boolean => {
-    // If the flag is explicitly set, use it
     if ('requirementsNotMet' in item && item.requirementsNotMet === true) {
       return true;
     }
-    
-    // Fall back to checking if all signatures are valid but document is invalid
     return !item.valid && 
            item.validSignatures === item.signatures && 
            item.signatures > 0;
@@ -68,14 +79,12 @@ export default function HistoryPage() {
   // Function to determine the appropriate icon for a validation item
   const getStatusIcon = (item: ValidationResponse) => {
     if (item.valid) {
-      return <CheckCircle size={24} color="#27ae60" />;
+      return <CheckCircle size={20} color="#27ae60" />;
     }
-    
     if (isRequirementsNotMet(item)) {
-      return <AlertCircle size={24} color="#f59e0b" />;
+      return <AlertCircle size={20} color="#f59e0b" />;
     }
-    
-    return <AlertTriangle size={24} color="#e74c3c" />;
+    return <AlertTriangle size={20} color="#e74c3c" />;
   };
   
   // Function to get appropriate color for status chip
@@ -86,14 +95,12 @@ export default function HistoryPage() {
         text: '#27ae60'
       };
     }
-    
     if (isRequirementsNotMet(item)) {
       return {
         bg: 'rgba(245, 158, 11, 0.1)',
         text: '#f59e0b'
       };
     }
-    
     return {
       bg: 'rgba(231, 76, 60, 0.1)',
       text: '#e74c3c'
@@ -105,13 +112,78 @@ export default function HistoryPage() {
     if (item.valid) {
       return t('validDocument');
     }
-    
     if (isRequirementsNotMet(item)) {
       return t('requirementsNotMet');
     }
-    
     return t('invalidDocument');
   };
+
+  // Filtered history based on search
+  const filteredHistory = history.map(batch => ({
+    ...batch,
+    results: batch.results.filter(item =>
+      (item.filename || '').toLowerCase().includes(search.toLowerCase())
+    )
+  })).filter(batch => batch.results.length > 0)
+
+  const renderDocumentCard = (item: ValidationResponse, timestamp: string) => (
+    <Paper
+      key={item.id}
+      elevation={1}
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: theme.shadows[4]
+        },
+        bgcolor: selectedValidation === item.id ? 'action.selected' : 'background.paper'
+      }}
+      onClick={() => handleViewValidation(item.id)}
+    >
+      <Stack spacing={1.5}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {getStatusIcon(item)}
+          <Typography variant="subtitle1" sx={{ 
+            flex: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: '50ch'
+          }}>
+            {item.filename}
+          </Typography>
+          <Chip 
+            size="small"
+            label={getStatusText(item)}
+            sx={{ 
+              fontSize: '0.75rem',
+              bgcolor: getStatusColor(item).bg,
+              color: getStatusColor(item).text,
+              height: '20px'
+            }}
+          />
+        </Box>
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, color: 'text.secondary' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Clock size={14} />
+            <Typography variant="caption">
+              {formatDate(timestamp)}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <UserCheck size={14} />
+            <Typography variant="caption">
+              {item.validSignatures}/{item.signatures} {t('signatures')}
+            </Typography>
+          </Box>
+        </Box>
+      </Stack>
+    </Paper>
+  );
 
   return (
     <MainContent
@@ -120,38 +192,39 @@ export default function HistoryPage() {
     >
       <div className="history-container">
         <Paper 
-          elevation={3} 
+          elevation={2} 
           sx={{ 
             width: '100%', 
-            maxWidth: 1200, 
-            borderRadius: 3,
+            maxWidth: 1400, 
+            borderRadius: 2,
             overflow: 'hidden'
           }}
         >
           <Box sx={{ 
-            p: 3, 
+            p: 2, 
             display: 'flex', 
             justifyContent: 'space-between', 
             alignItems: 'center',
             borderBottom: '1px solid rgba(0,0,0,0.08)'
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <History size={22} />
-              <Typography variant="h6" sx={{ fontWeight: 500 }}>
-                {t('historyTitle')}
-              </Typography>
-            </Box>
+            <TextField
+              variant="outlined"
+              size="small"
+              placeholder={t('searchPlaceholder') || 'Search documents...'}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              sx={{ width: 220, mr: 3 }}
+              InputProps={{
+                startAdornment: <Search size={18} style={{ marginRight: 8, color: theme.palette.text.secondary }} />
+              }}
+            />
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
-                variant="outlined"
+                variant="contained"
                 size="small"
                 startIcon={<RefreshCw size={16} />}
                 onClick={() => router.push('/')}
-                sx={{
-                  borderColor: 'rgba(0,0,0,0.2)',
-                  color: 'rgba(0,0,0,0.7)',
-                  textTransform: 'none'
-                }}
+                sx={{ textTransform: 'none' }}
               >
                 {t('newValidation')}
               </Button>
@@ -170,16 +243,16 @@ export default function HistoryPage() {
             </Box>
           </Box>
 
-          {history.length === 0 ? (
+          {filteredHistory.length === 0 ? (
             <Box sx={{ 
-              py: 5, 
+              py: 6, 
               px: 3, 
               display: 'flex', 
               flexDirection: 'column', 
               alignItems: 'center',
               textAlign: 'center'
             }}>
-              <Search size={48} color="#ccc" />
+              <Search size={40} color={theme.palette.text.secondary} />
               <Typography variant="h6" sx={{ mt: 2, color: 'text.secondary' }}>
                 {t('noHistoryTitle')}
               </Typography>
@@ -188,92 +261,58 @@ export default function HistoryPage() {
               </Typography>
               <Button
                 variant="contained"
-                onClick={() => router.push('/validate')}
+                onClick={() => router.push('/')}
                 startIcon={<FileText size={16} />}
-                sx={{
-                  bgcolor: '#e74c3c',
-                  '&:hover': { bgcolor: '#c0392b' },
-                  textTransform: 'none',
-                  px: 3,
-                  py: 1
-                }}
+                sx={{ textTransform: 'none' }}
               >
                 {t('validateDocument')}
               </Button>
             </Box>
           ) : (
-            <TableContainer>
-              <Table sx={{ minWidth: 650 }}>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
-                    <TableCell width="5%" sx={{ fontWeight: 600 }}>{t('status')}</TableCell>
-                    <TableCell width="35%" sx={{ fontWeight: 600 }}>{t('document')}</TableCell>
-                    <TableCell width="20%" sx={{ fontWeight: 600 }}>{t('date')}</TableCell>
-                    <TableCell width="15%" sx={{ fontWeight: 600 }}>{t('signatures')}</TableCell>
-                    <TableCell width="25%" align="right" sx={{ fontWeight: 600 }}>{t('actions')}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {history.map((batch) => (
-                    batch.results.map((item) => (
-                      <TableRow 
-                        key={item.id}
-                        hover
-                        sx={{
-                          '&:last-child td, &:last-child th': { border: 0 },
-                          bgcolor: selectedValidation === item.id ? 'rgba(0,0,0,0.03)' : 'transparent',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => handleViewValidation(item.id)}
-                      >
-                        <TableCell>
-                          <div className="status-icon">
-                            {getStatusIcon(item)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="document-name">
-                            <span className="filename-text">{item.originalFile || item.filename}</span>
-                            <Chip 
-                              size="small"
-                              label={getStatusText(item)}
-                              sx={{ 
-                                fontSize: '0.7rem',
-                                bgcolor: getStatusColor(item).bg,
-                                color: getStatusColor(item).text,
-                                height: '20px',
-                                ml: 1
-                              }}
-                            />
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="validation-date">
-                            {formatDate(batch.batch.timestamp)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="signature-count">
-                            {item.validSignatures}/{item.signatures}
-                          </div>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                            <IconButton
-                              size="small"
-                              onClick={(e) => handleRemoveItem(batch.batch.id, e)}
-                              sx={{ color: 'rgba(0,0,0,0.5)' }}
-                            >
-                              <Trash2 size={16} />
-                            </IconButton>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={2}>
+                {filteredHistory.map((batch) => (
+                  <React.Fragment key={batch.batch.id}>
+                    {batch.results.length === 1 ? (
+                      renderDocumentCard(batch.results[0], batch.batch.timestamp)
+                    ) : (
+                      <Box sx={{
+                        border: '1px dashed',
+                        borderColor: 'divider',
+                        borderRadius: 2,
+                        p: 1.5
+                      }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 1,
+                          mb: 1.5,
+                          px: 1
+                        }}>
+                          <FileText size={16} color={theme.palette.primary.main} />
+                          <Typography variant="subtitle2" color="text.secondary">
+                            {t('batchValidation')} - {formatDate(batch.batch.timestamp)}
+                          </Typography>
+                          <Chip 
+                            size="small"
+                            label={`${batch.batch.summary.validFiles}/${batch.batch.summary.totalFiles} ${t('valid')}`}
+                            sx={{ 
+                              fontSize: '0.75rem',
+                              bgcolor: 'success.main',
+                              color: 'white',
+                              height: '20px'
+                            }}
+                          />
+                        </Box>
+                        <Stack spacing={1.5}>
+                          {batch.results.map(item => renderDocumentCard(item, batch.batch.timestamp))}
+                        </Stack>
+                      </Box>
+                    )}
+                  </React.Fragment>
+                ))}
+              </Stack>
+            </Box>
           )}
         </Paper>
       </div>
@@ -287,51 +326,9 @@ export default function HistoryPage() {
           padding: 1rem;
         }
         
-        .status-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .document-name {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-        
-        .filename-text {
-          font-weight: 500;
-          color: rgba(0, 0, 0, 0.85);
-        }
-        
-        .validation-date {
-          color: rgba(0, 0, 0, 0.6);
-          font-size: 0.85rem;
-        }
-        
-        .signature-count {
-          color: rgba(0, 0, 0, 0.6);
-          font-size: 0.85rem;
-        }
-        
         @media (max-width: 768px) {
-          .document-name {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 4px;
-          }
-          
-          .validation-date {
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-          }
-          
-          .signature-count {
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
+          .history-container {
+            padding: 0.5rem;
           }
         }
       `}</style>

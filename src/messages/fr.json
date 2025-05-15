@@ -403,7 +403,10 @@
     "signatures": "Signatures",
     "validDocument": "Document valide",
     "invalidDocument": "Document invalide",
-    "requirementsNotMet": "Exigences non satisfaites"
+    "requirementsNotMet": "Exigences non satisfaites",
+    "batchValidation": "Validation par lot",
+    "valid": "Valide",
+    "searchPlaceholder": "Rechercher documents..."
   },
   "Sidebar": {
     "validate": "Valider un document",

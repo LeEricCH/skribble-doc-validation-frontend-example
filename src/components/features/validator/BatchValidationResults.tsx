@@ -14,6 +14,7 @@ import type { ValidationResponse, ValidationOptions, SignerInfo } from '@/types/
 import ValidationResults from './ValidationResults'
 import type { ValidationDisplayData } from './ValidationResults'
 import { getValidationStatus } from '@/utils/validationUtils'
+import validationStorage from '@/utils/validationStorage'
 
 interface BatchSummary {
   totalFiles: number
@@ -27,6 +28,7 @@ interface BatchValidationProps {
   batchInfo: {
     summary: BatchSummary
     settings?: ValidationOptions | undefined
+    timestamp: string
   }
   onDocumentClick?: (docId: string) => void
   resultIndex?: number | null
@@ -59,7 +61,7 @@ function DocumentSelectionSidebar({
           return (
             <button
               key={result.id || `result-${index}`}
-              className={`document-tab ${activeIndex === index ? 'active' : ''}`}
+              className={`document-tab${activeIndex === index ? ` active status-${status}` : ''}`}
               onClick={() => onDocumentSelect(index)}
               type="button"
             >
@@ -147,7 +149,19 @@ function DocumentSelectionSidebar({
         
         .document-tab.active {
           background-color: #f5f5f5;
+          border-left: 3px solid transparent;
+        }
+        
+        .document-tab.active.status-valid {
+          border-left: 3px solid #10b981;
+        }
+        
+        .document-tab.active.status-invalid {
           border-left: 3px solid #e74c3c;
+        }
+        
+        .document-tab.active.status-requirementsNotMet {
+          border-left: 3px solid #f59e0b;
         }
         
         .tab-icon {
@@ -220,22 +234,18 @@ export default function BatchValidationResults({
   const [activeDocumentSigners, setActiveDocumentSigners] = useState<SignerInfo[] | null>(null)
   const [isLoadingActiveSigners, setIsLoadingActiveSigners] = useState(false)
   
+  // Get signers
+
   // Function to fetch signers for a document by ID
-  const fetchSignersForDocument = useCallback(async (documentId: string | undefined) => {
+  const fetchSignersForDocument = useCallback((documentId: string | undefined) => {
     if (!documentId) return
     
     setIsLoadingActiveSigners(true)
     try {
-      const response = await fetch(`/api/signers/${documentId}`)
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch signer info: ${response.status}`)
-      }
-      
-      const data = await response.json()
-      setActiveDocumentSigners(data)
+      const signers = validationStorage.getSigners(documentId)
+      setActiveDocumentSigners(signers)
     } catch (err) {
-      console.error('Error fetching signer info:', err)
+      console.error('Error getting signer info:', err)
       setActiveDocumentSigners(null)
     } finally {
       setIsLoadingActiveSigners(false)
@@ -278,7 +288,7 @@ export default function BatchValidationResults({
       valid: result.valid,
       filename: result.originalFile || result.filename || 'Unknown',
       size: result.size || 0,
-      timestamp: new Date().toISOString(),
+      timestamp: batchInfo.timestamp,
       totalSignatures: result.signatures,
       validSignatures: result.validSignatures,
       quality: result.quality,
@@ -368,7 +378,7 @@ export default function BatchValidationResults({
             return (
               <button
                 key={result.id || `result-${index}`}
-                className={`document-tab ${activeTabIndex === index ? 'active' : ''}`}
+                className={`document-tab${activeTabIndex === index ? ` active status-${status}` : ''}`}
                 onClick={() => handleTabClick(index)}
                 type="button"
               >

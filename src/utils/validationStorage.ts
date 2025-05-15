@@ -1,4 +1,4 @@
-import type { ValidationResponse, ValidationOptions } from '@/types/validation';
+import type { ValidationResponse, ValidationOptions, SignerInfo } from '@/types/validation';
 
 // Define types for better type safety
 export interface StoredValidationData {
@@ -138,7 +138,8 @@ class ValidationStorage {
         // Add batch settings to the result
         const resultWithSettings = {
           ...result,
-          settings: batch.batch.settings
+          settings: batch.batch.settings,
+          batchId: batch.batch.id
         };
         // Cast to the expected type
         return resultWithSettings as ValidationResponse & Record<string, unknown>;
@@ -182,6 +183,21 @@ class ValidationStorage {
     return storage.history
       .map(item => storage.batches[item.batchId])
       .filter(Boolean) as BatchValidationResult[];
+  };
+  
+  /**
+   * Get signer information for a validation
+   */
+  getSigners = (validationId: string): SignerInfo[] | null => {
+    const storage = this.getStorage();
+    // Find the batch containing this validation ID
+    for (const batch of Object.values(storage.batches)) {
+      const result = batch.results.find(r => r.id === validationId);
+      if (result) {
+        return result.additionalInfos?.signer || null;
+      }
+    }
+    return null;
   };
   
   /**

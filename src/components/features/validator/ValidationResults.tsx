@@ -49,6 +49,8 @@ export interface ValidationDisplayData {
   settingsLongTermValidation?: boolean;
   settingsRejectVisualDifferences?: boolean;
   settingsRejectUndefinedChanges?: boolean;
+  // Add requirements not met flag
+  requirementsNotMet?: boolean;
 }
 
 interface ValidationResultsProps {

@@ -402,7 +402,10 @@
     "viewResults": "View",
     "validDocument": "Valid Document",
     "invalidDocument": "Invalid Document",
-    "requirementsNotMet": "Requirements Not Met"
+    "requirementsNotMet": "Requirements Not Met",
+    "batchValidation": "Batch Validation",
+    "valid": "Valid",
+    "searchPlaceholder": "Search documents..."
   },
   "Sidebar": {
     "validate": "Validate Document",

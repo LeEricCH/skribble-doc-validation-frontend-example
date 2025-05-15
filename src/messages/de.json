@@ -338,7 +338,10 @@
     "viewResults": "Anzeigen",
     "validDocument": "Gültiges Dokument",
     "invalidDocument": "Ungültiges Dokument",
-    "requirementsNotMet": "Anforderungen nicht erfüllt"
+    "requirementsNotMet": "Anforderungen nicht erfüllt",
+    "searchPlaceholder": "Dokumente suchen...",
+    "batchValidation": "Stapelvalidierung",
+    "valid": "Gültig"
   },
   "Sidebar": {
     "validate": "Dokument prüfen",
