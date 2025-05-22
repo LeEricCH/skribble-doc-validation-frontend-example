@@ -186,35 +186,24 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ validationId }) => 
     }] : [])
   ] : []
   
-  // Update status display logic to better align with ValidationResults component
-//   const getStatusClassName = () => {
-//     // For technical details, consider the validation as passed if one of these conditions is met
-//     if (technicalData.mainIndication.includes('TOTAL_PASSED') || 
-//         technicalData.mainIndication.includes('PASSED')) {
-//       return 'passed';
-//     }
+  // Update the constraints count calculation to filter out-of-bounds constraints
+  const validConstraints = technicalData.constraints.filter(c => {
+    // Skip disabled constraints
+    if (c.ConstraintStatus.Status === 'urn:etsi:019102:constraintStatus:disabled') {
+      return false;
+    }
     
-//     // Check for "requirements not met" type of status
-//     if (technicalData.mainIndication.includes('INDETERMINATE')) {
-//       return 'indeterminate';
-//     }
+    // Skip any constraint that has an out-of-bounds indication
+    if (c.ValidationStatus?.SubIndication?.includes('OUT_OF_BOUNDS')) {
+      return false;
+    }
     
-//     // Default to failed
-//     return 'failed';
-//   }
-  
-  // Translate technical status to user-friendly text
-//   const getStatusText = () => {
-//     const status = getStatusClassName();
-//     if (status === 'passed') return t('statusPassed');
-//     if (status === 'indeterminate') return t('statusIndeterminate');
-//     return t('statusFailed');
-//   }
+    return c.ValidationStatus !== undefined;
+  });
 
-  const constraintsPassed = technicalData.constraints.filter(c => 
+  const constraintsPassed = validConstraints.filter(c => 
     c.ValidationStatus?.MainIndication.includes('passed')).length;
-  const totalConstraints = technicalData.constraints.filter(c => 
-    c.ValidationStatus).length;
+  const totalConstraints = validConstraints.length;
 
   return (
     <div className="technical-details-container">
@@ -333,7 +322,7 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ validationId }) => 
                           />
                         </div>
                         <p className="score-description">
-                          {descTKey && count && total 
+                          {descTKey && (count !== undefined && total !== undefined)
                             ? t(descTKey, { count, total }) 
                             : descTKey 
                               ? t(descTKey)
@@ -499,13 +488,13 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ validationId }) => 
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                <AlertTriangle size={18} style={{ marginRight: 12, color: theme.palette.warning.main }} />
+                <AlertTriangle size={18} style={{ marginRight: 12, color: theme.palette.primary.main }} />
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, flexGrow: 1 }}>
                   {t('validationConstraints')}
                 </Typography>
-                {technicalData.constraints.length > 0 && (
+                {validConstraints.length > 0 && (
                   <Chip 
-                    label={technicalData.constraints.length}
+                    label={validConstraints.length}
                     size="small"
                     sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
                   />
@@ -513,17 +502,15 @@ const TechnicalDetails: React.FC<TechnicalDetailsProps> = ({ validationId }) => 
               </Box>
             </AccordionSummary>
             <AccordionDetails sx={{ p: 2.5 }}>
-              {technicalData.constraints.filter(c => c.ValidationStatus).length > 0 ? (
+              {validConstraints.length > 0 ? (
                 <div className="constraints-list">
-                  {technicalData.constraints
-                    .filter(c => c.ValidationStatus)
-                    .map((constraint, i) => {
+                  {validConstraints.map((constraint, i) => {
                     const status = constraint.ValidationStatus?.MainIndication.includes('passed') 
                       ? 'passed' 
                       : constraint.ValidationStatus?.MainIndication.includes('failed')
                         ? 'failed'
                         : 'disabled';
-                        
+                    
                     return (
                       <div 
                         key={`${constraint.ValidationConstraintIdentifier}-${i}`} 

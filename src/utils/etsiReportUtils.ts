@@ -287,21 +287,47 @@ export function calculateValidationScore(data: TechnicalValidationData): Validat
   let totalScore = 0;
   
   // Score for validation constraints
-  const constraintsPassed = data.constraints.filter(c => 
-    c.ValidationStatus?.MainIndication === 'urn:etsi:019102:mainindication:passed'
-  ).length;
-  const constraintsTotal = data.constraints.filter(c => 
-    c.ConstraintStatus.Status === 'urn:etsi:019102:constraintStatus:applied'
-  ).length;
+  // Only consider constraints that are not out-of-bounds related
+  const validConstraints = data.constraints.filter(c => {
+    // Skip disabled constraints
+    if (c.ConstraintStatus.Status === 'urn:etsi:019102:constraintStatus:disabled') {
+      return false;
+    }
+    
+    // Skip constraints with out-of-bounds indications
+    if (c.ValidationStatus?.SubIndication === 'OUT_OF_BOUNDS_NOT_REVOKED' ||
+        c.ValidationStatus?.SubIndication === 'OUT_OF_BOUNDS_NO_POE') {
+      return false;
+    }
+    
+    // Include if applied and has validation status
+    return c.ConstraintStatus.Status === 'urn:etsi:019102:constraintStatus:applied' &&
+           c.ValidationStatus !== undefined;
+  });
   
-  if (constraintsTotal > 0) {
-    const constraintScore = Math.round((constraintsPassed / constraintsTotal) * 100);
+  // If main indication is total-passed, consider all constraints as passed
+  if (data.mainIndication === 'urn:etsi:019102:mainindication:total-passed') {
     scoreItems.push({
       name: 'Validation Constraints',
-      score: constraintScore,
-      description: `${constraintsPassed} of ${constraintsTotal} validation constraints passed`
+      score: 100,
+      description: 'All validation constraints passed'
     });
-    totalScore += constraintScore;
+    totalScore += 100;
+  } else {
+    const constraintsPassed = validConstraints.filter(c => 
+      c.ValidationStatus?.MainIndication === 'urn:etsi:019102:mainindication:passed'
+    ).length;
+    const constraintsTotal = validConstraints.length;
+    
+    if (constraintsTotal > 0) {
+      const constraintScore = Math.round((constraintsPassed / constraintsTotal) * 100);
+      scoreItems.push({
+        name: 'Validation Constraints',
+        score: constraintScore,
+        description: `${constraintsPassed} of ${constraintsTotal} validation constraints passed`
+      });
+      totalScore += constraintScore;
+    }
   }
   
   // Score for cryptographic security
