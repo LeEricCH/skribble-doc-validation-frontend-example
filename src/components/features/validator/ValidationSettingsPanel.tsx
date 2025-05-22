@@ -41,9 +41,9 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
   const theme = useTheme();
   const [localSettings, setLocalSettings] = useState<ValidationOptions>(() => {
     return settings || {
-      quality: 'SES',
+      quality: undefined,
       longTermValidation: false,
-      legislation: 'WORLD',
+      legislation: undefined,
       infos: ['validation', 'signer'],
       rejectVisualDifferences: false,
       rejectUndefinedChanges: false
@@ -52,9 +52,9 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
   
   const [expanded, setExpanded] = useState<string | false>(false);
   const defaultSettings: ValidationOptions = {
-    quality: 'SES',
+    quality: undefined,
     longTermValidation: false,
-    legislation: 'WORLD',
+    legislation: undefined,
     infos: ['validation', 'signer'],
     rejectVisualDifferences: false,
     rejectUndefinedChanges: false
@@ -131,6 +131,7 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
     event.stopPropagation();
     const newSettings = {
       ...localSettings,
+      longTermValidation: defaultSettings.longTermValidation,
       rejectVisualDifferences: defaultSettings.rejectVisualDifferences,
       rejectUndefinedChanges: defaultSettings.rejectUndefinedChanges
     };
@@ -188,7 +189,7 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
             </Typography>
             
             <RadioGroup
-              value={localSettings.quality || 'SES'}
+              value={localSettings.quality || ''}
               onChange={handleQualityChange}
               name="signature-quality"
             >
@@ -265,7 +266,7 @@ export default function ValidationSettingsPanel({ settings, onSettingsChange }: 
               {t('legislation.helper')}
             </Typography>
             <RadioGroup
-              value={localSettings.legislation || 'WORLD'}
+              value={localSettings.legislation || ''}
               onChange={handleLegislationChange}
               name="legislation"
             >
