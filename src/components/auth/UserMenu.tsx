@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import type React from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogIn, LogOut, User, ChevronRight, Loader } from 'lucide-react';
 import { useTranslations } from 'next-intl';
