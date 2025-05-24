@@ -7,7 +7,8 @@ export function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/api') || 
     request.nextUrl.pathname.startsWith('/onboarding') ||
     request.nextUrl.pathname.includes('_next') ||
-    request.nextUrl.pathname.includes('favicon.ico')
+    request.nextUrl.pathname.includes('favicon.ico') ||
+    request.nextUrl.pathname.includes('silent-check-sso.html')
   ) {
     return NextResponse.next();
   }

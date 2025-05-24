@@ -356,8 +356,17 @@
     "backToApp": "Zurück zur App",
     "language": "Sprache",
     "faq": "FAQ",
+    "loginWithSkribble": "Mit Skribble anmelden",
+    "logout": "Abmelden",
+    "loggingOut": "Abmelden...",
     "contact": "Kontakt",
-    "about": "Über uns"
+    "about": "Über uns",
+    "Auth": {
+      "loginSuccess": "Erfolgreich angemeldet",
+      "logoutSuccess": "Erfolgreich abgemeldet",
+      "loginError": "Anmeldung fehlgeschlagen",
+      "sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
+    }
   },
   "SecondarySidebar": {
     "navigation": "Navigation",
@@ -543,5 +552,11 @@
       "signatureFormat": "Signaturformat",
       "formatDescription": "Langzeitarchivierungssignaturformat (maximale Langlebigkeit)"
     }
+  },
+  "AuthDialog": {
+    "loginRequiredTitle": "Anmeldung erforderlich",
+    "loginRequiredMessage": "Sie müssen mit Ihrem Skribble-Konto angemeldet sein, um Dokumente zu validieren. Bitte melden Sie sich an, um fortzufahren.",
+    "cancelButton": "Abbrechen",
+    "loginButton": "Anmelden"
   }
 } 

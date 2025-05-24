@@ -12,6 +12,8 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import '@/styles/batch-validation.css'
 import validationStorage from '@/utils/validationStorage'
+import AuthDialog from '@/components/features/validator/AuthDialog'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function ValidatePage() {
   const t = useTranslations('Validator')
@@ -24,6 +26,9 @@ export default function ValidatePage() {
   
   // Get validation settings from localStorage if available
   const [validationSettings, setValidationSettings] = useState<ValidationOptions | null>(null);
+
+  const { isAuthenticated } = useAuth();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   useEffect(() => {    
     // Retrieve settings from localStorage when component mounts
@@ -41,6 +46,11 @@ export default function ValidatePage() {
 
   // Handle file upload
   const handleUpload = async () => {
+    if (!isAuthenticated) {
+      setAuthDialogOpen(true);
+      return;
+    }
+
     if (selectedFiles.length === 0) {
       setError(t('noFilesSelected'));
       return;
@@ -128,6 +138,7 @@ export default function ValidatePage() {
       description={t('description')}
       icon={<FileCheck />}
     >
+      <AuthDialog open={authDialogOpen} onClose={() => setAuthDialogOpen(false)} />
       {error && (
         <Alert 
           severity="error" 

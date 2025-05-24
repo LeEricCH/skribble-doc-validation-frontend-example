@@ -409,20 +409,29 @@
     "searchPlaceholder": "Rechercher documents..."
   },
   "Sidebar": {
-    "validate": "Valider un document",
+    "validate": "Valider",
     "history": "Historique",
     "help": "Aide",
     "settings": "Paramètres",
     "logoTitle": "Logo Paperflow",
     "appName": "Paperflow",
-    "appSubtitle": "Validator",
+    "appSubtitle": "Validateur",
     "closeMenu": "Fermer le menu",
     "openMenu": "Ouvrir le menu",
     "backToApp": "Retour à l'application",
     "language": "Langue",
     "faq": "FAQ",
+    "loginWithSkribble": "Se connecter avec Skribble",
+    "logout": "Déconnexion",
+    "loggingOut": "Déconnexion en cours...",
     "contact": "Contact",
-    "about": "À propos"
+    "about": "À propos",
+    "auth": {
+      "loginSuccess": "Connecté avec succès",
+      "logoutSuccess": "Déconnecté avec succès",
+      "loginError": "Échec de la connexion",
+      "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
+    }
   },
   "SecondarySidebar": {
     "navigation": "Navigation",
@@ -543,5 +552,11 @@
       "signatureFormat": "Format de signature",
       "formatDescription": "Format de signature d'archivage à long terme (longévité maximale)"
     }
+  },
+  "AuthDialog": {
+    "loginRequiredTitle": "Connexion requise",
+    "loginRequiredMessage": "Vous devez être connecté avec votre compte Skribble pour valider des documents. Veuillez vous connecter pour continuer.",
+    "cancelButton": "Annuler",
+    "loginButton": "Connexion"
   }
 } 

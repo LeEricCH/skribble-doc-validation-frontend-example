@@ -12,11 +12,12 @@ import {
   Menu,
   X,
   Globe,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 import { useTranslations } from 'next-intl';
 import Cookies from 'js-cookie';
 import Image from 'next/image';
+import UserMenu from "@/components/auth/UserMenu";
 
 // Language mapping
 interface LanguageData {
@@ -193,6 +194,9 @@ export default function Sidebar() {
         </nav>
         
         <div className="sidebar-footer">
+          {/* User menu */}
+          <UserMenu />
+          
           <DropdownMenuItem 
             icon={Globe} 
             label={t('language')} 
@@ -432,6 +436,48 @@ export default function Sidebar() {
         
         .check-icon {
           color: #e74c3c;
+        }
+
+        /* Sidebar navigation styles */
+        .sidebar-nav {
+          flex: 1;
+          margin-bottom: 1rem;
+        }
+        
+        .sidebar-nav-item {
+          display: flex;
+          align-items: center;
+          padding: 0.75rem 1.5rem;
+          color: #ffffffcc;
+          text-decoration: none;
+          transition: background-color 0.2s;
+        }
+        
+        .sidebar-nav-item:hover, 
+        .sidebar-nav-item.active {
+          background-color: #253151;
+          color: white;
+          cursor: pointer;
+        }
+        
+        .sidebar-nav-item.active {
+          border-left: 3px solid #e74c3c;
+          padding-left: calc(1.5rem - 3px);
+        }
+        
+        .sidebar-nav-item-icon {
+          margin-right: 0.75rem;
+          flex-shrink: 0;
+        }
+        
+        .sidebar-nav-item-text {
+          font-size: 0.875rem;
+        }
+        
+        .sidebar-footer {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
         }
       `}</style>
     </>

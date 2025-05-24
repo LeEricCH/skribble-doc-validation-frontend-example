@@ -408,20 +408,20 @@
     "searchPlaceholder": "Search documents..."
   },
   "Sidebar": {
-    "validate": "Validate Document",
+    "validate": "Validate",
     "history": "History",
-    "help": "Help",
     "settings": "Settings",
+    "help": "Help",
+    "faq": "FAQ",
+    "language": "Language",
+    "loginWithSkribble": "Log in with Skribble",
+    "logout": "Log out",
+    "loggingOut": "Logging out...",
     "logoTitle": "Paperflow Logo",
     "appName": "Paperflow",
-    "appSubtitle": "Validator",
+    "appSubtitle": "Document Validator",
     "closeMenu": "Close menu",
-    "openMenu": "Open menu",
-    "backToApp": "Back to App",
-    "language": "Language",
-    "faq": "FAQ",
-    "contact": "Contact",
-    "about": "About"
+    "openMenu": "Open menu"
   },
   "SecondarySidebar": {
     "navigation": "Navigation",
@@ -542,5 +542,17 @@
       "signatureFormat": "Signature Format",
       "formatDescription": "Long-Term Archival signature format (maximum longevity)"
     }
+  },
+  "Auth": {
+    "loginSuccess": "Successfully logged in",
+    "logoutSuccess": "Successfully logged out",
+    "loginError": "Login failed",
+    "sessionExpired": "Your session has expired. Please log in again."
+  },
+  "AuthDialog": {
+    "loginRequiredTitle": "Login Required",
+    "loginRequiredMessage": "You need to be logged in with your Skribble account to validate documents. Please log in to continue.",
+    "cancelButton": "Cancel",
+    "loginButton": "Login"
   }
 } 

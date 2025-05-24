@@ -6,6 +6,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '@/theme';
 import { NextIntlClientProvider } from 'next-intl';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -23,12 +24,14 @@ export default function ClientLayout({ children, locale, messages }: ClientLayou
           timeZone="Europe/Zurich"
           // You can also use Intl.DateTimeFormat().resolvedOptions().timeZone to get browser timezone
         >
-          <Sidebar />
-          <main className="main-content">
-            <div className="content-container">
-              {children}
-            </div>
-          </main>
+          <AuthProvider>
+            <Sidebar />
+            <main className="main-content">
+              <div className="content-container">
+                {children}
+              </div>
+            </main>
+          </AuthProvider>
           
           <style jsx global>{`
             body {

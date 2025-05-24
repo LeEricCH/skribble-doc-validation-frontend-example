@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keycloak Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/keycloak-js@22.0.5/dist/keycloak.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <h1>Keycloak Configuration Test</h1>
+  
+  <h2>Configuration</h2>
+  <div>
+    <p><strong>Keycloak URL:</strong> <span id="keycloak-url"></span></p>
+    <p><strong>Realm:</strong> <span id="keycloak-realm"></span></p>
+    <p><strong>Client ID:</strong> <span id="keycloak-client-id"></span></p>
+  </div>
+
+  <div>
+    <button id="init-btn">Initialize Keycloak</button>
+    <button id="login-btn" disabled>Login</button>
+    <button id="logout-btn" disabled>Logout</button>
+    <button id="token-btn" disabled>Get Token</button>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <h3>Token Information</h3>
+  <pre id="token-info"></pre>
+
+  <script>
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const url = urlParams.get('url') || 'https://kc.scribital.com/auth';
+    const realm = urlParams.get('realm') || 'skribble';
+    const clientId = urlParams.get('clientId') || 'skribble-doc-validation-client';
+
+    // Display configuration
+    document.getElementById('keycloak-url').textContent = url;
+    document.getElementById('keycloak-realm').textContent = realm;
+    document.getElementById('keycloak-client-id').textContent = clientId;
+
+    // Initialize Keycloak instance
+    const keycloak = new Keycloak({
+      url,
+      realm,
+      clientId
+    });
+
+    // Status display functions
+    function showSuccess(message) {
+      const status = document.getElementById('status');
+      status.className = 'status success';
+      status.textContent = message;
+    }
+
+    function showError(message) {
+      const status = document.getElementById('status');
+      status.className = 'status error';
+      status.textContent = message;
+    }
+
+    function updateButtons(authenticated) {
+      document.getElementById('login-btn').disabled = authenticated;
+      document.getElementById('logout-btn').disabled = !authenticated;
+      document.getElementById('token-btn').disabled = !authenticated;
+    }
+
+    function updateTokenInfo() {
+      const tokenInfo = document.getElementById('token-info');
+      if (keycloak.authenticated) {
+        const info = {
+          authenticated: keycloak.authenticated,
+          token: keycloak.token ? `${keycloak.token.substring(0, 20)}...` : undefined,
+          tokenParsed: keycloak.tokenParsed,
+          subject: keycloak.subject,
+          idToken: keycloak.idToken ? `${keycloak.idToken.substring(0, 20)}...` : undefined,
+          refreshToken: keycloak.refreshToken ? `${keycloak.refreshToken.substring(0, 20)}...` : undefined,
+        };
+        tokenInfo.textContent = JSON.stringify(info, null, 2);
+      } else {
+        tokenInfo.textContent = 'Not authenticated';
+      }
+    }
+
+    // Button click handlers
+    document.getElementById('init-btn').addEventListener('click', () => {
+      keycloak.init({
+        onLoad: 'check-sso',
+        silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+        pkceMethod: 'S256',
+        checkLoginIframe: false,
+        enableLogging: true
+      }).then(authenticated => {
+        if (authenticated) {
+          showSuccess('Successfully authenticated');
+          updateButtons(true);
+        } else {
+          showSuccess('Not authenticated');
+          updateButtons(false);
+        }
+        updateTokenInfo();
+      }).catch(error => {
+        showError(`Failed to initialize: ${error}`);
+        console.error('Initialization error', error);
+        updateButtons(false);
+      });
+    });
+
+    document.getElementById('login-btn').addEventListener('click', () => {
+      keycloak.login().catch(error => {
+        showError(`Login error: ${error}`);
+      });
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      keycloak.logout().catch(error => {
+        showError(`Logout error: ${error}`);
+      });
+    });
+
+    document.getElementById('token-btn').addEventListener('click', () => {
+      keycloak.updateToken(30).then(refreshed => {
+        if (refreshed) {
+          showSuccess('Token refreshed');
+        } else {
+          showSuccess('Token is still valid');
+        }
+        updateTokenInfo();
+      }).catch(error => {
+        showError(`Failed to refresh token: ${error}`);
+      });
+    });
+  </script>
+</body>
+</html> 
