@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { initKeycloak, isAuthenticated, login, logout, getUserInfo } from '@/utils/keycloak';
 
 interface User {
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (typeof window !== 'undefined') {
       // Check if we're on the callback URL
-      if (window.location.hash && window.location.hash.includes('state=')) {
+      if (window.location.hash?.includes('state=')) {
         console.log('Detected auth callback, waiting for processing...');
         // The Keycloak will handle this automatically in initAuth
       }

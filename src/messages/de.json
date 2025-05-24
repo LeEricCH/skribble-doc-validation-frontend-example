@@ -149,7 +149,8 @@
     "validatingBatch": "Validiere {count} Dokumente",
     "validatingDescription": "Wir überprüfen die Signaturen und Authentizität. Dies kann einen Moment dauern.",
     "processingFiles": "Ihre Dateien werden verarbeitet...",
-    "unknownError": "Ein unbekannter Fehler ist aufgetreten"
+    "unknownError": "Ein unbekannter Fehler ist aufgetreten",
+    "validationError": "Es ist ein Fehler aufgetreten, während das Dokument validiert wurde. Bitte versuchen Sie es erneut."
   },
   "DocumentUploader": {
     "info": "Laden Sie signierte Dokumente hoch, um deren digitale Signaturen und Authentizität zu überprüfen.",

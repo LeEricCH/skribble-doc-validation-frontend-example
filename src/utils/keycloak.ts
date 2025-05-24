@@ -28,7 +28,7 @@ export const initKeycloak = async () => {
       // Initialize Keycloak with check-sso
       const authenticated = await keycloakInstance.init({
         onLoad: 'check-sso',
-        silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+        silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
         pkceMethod: 'S256',
         checkLoginIframe: false,  // Turn this off to avoid issues with iframes
         enableLogging: true, // Enable logging for debugging
@@ -142,7 +142,7 @@ export const handleAuthCallback = async () => {
     try {
       await kc.init({
         onLoad: 'check-sso',
-        silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
+        silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
         pkceMethod: 'S256',
       });
       

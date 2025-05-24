@@ -149,7 +149,8 @@
     "resultsDescription": "Afficher les résultats détaillés de validation pour ce document",
     "loadingResults": "Chargement des résultats de validation",
     "loadingDescription": "Veuillez patienter pendant que nous récupérons les détails de validation...",
-    "back": "Retour"
+    "back": "Retour",
+    "validationError": "Une erreur s'est produite lors de la validation du document. Veuillez réessayer."
   },
   "ValidationSettings": {
     "title": "Paramètres de validation",
